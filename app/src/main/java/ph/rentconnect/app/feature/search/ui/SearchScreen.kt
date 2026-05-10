@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -31,11 +32,17 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -52,7 +59,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -253,8 +262,13 @@ private fun SearchContent(
     onListingClick: (String) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 2 } }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     LazyColumn(
+        state = listState,
         modifier = Modifier.fillMaxSize(),
     ) {
         // Header with gradient — includes title, search field, and filters
@@ -564,6 +578,25 @@ private fun SearchContent(
         // Bottom spacer
         item { Spacer(Modifier.height(16.dp)) }
     }
+
+    AnimatedVisibility(
+        visible = showScrollToTop,
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier = Modifier
+            .align(Alignment.BottomEnd)
+            .padding(16.dp),
+    ) {
+        FloatingActionButton(
+            onClick = { scope.launch { listState.animateScrollToItem(0) } },
+            containerColor = Orange500,
+            contentColor = Color.White,
+            elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp),
+        ) {
+            Icon(Icons.Filled.KeyboardArrowUp, contentDescription = "Scroll to top")
+        }
+    }
+    } // Box
 }
 
 
