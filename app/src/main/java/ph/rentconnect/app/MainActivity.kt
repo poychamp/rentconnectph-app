@@ -42,7 +42,13 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 data object HomeRoute
 
 @Serializable
-data object SearchRoute
+data class SearchRoute(
+    val q: String? = null,
+    val area: String? = null,
+    val type: String? = null,
+    val budgetMin: Int? = null,
+    val budgetMax: Int? = null,
+)
 
 @Serializable
 data class DetailRoute(val uuid: String)
@@ -87,18 +93,40 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate(DetailRoute(uuid))
                             },
                             onNavigateToSearch = {
-                                navController.navigate(SearchRoute) {
+                                navController.navigate(SearchRoute()) {
                                     popUpTo(HomeRoute) { saveState = true }
                                     launchSingleTop = true
                                     restoreState = true
                                 }
                             },
+                            onNavigateToSearchWithFilters = { q, area, type, budgetMin, budgetMax ->
+                                navController.navigate(
+                                    SearchRoute(
+                                        q = q,
+                                        area = area,
+                                        type = type,
+                                        budgetMin = budgetMin,
+                                        budgetMax = budgetMax,
+                                    ),
+                                ) {
+                                    popUpTo(HomeRoute) { saveState = true }
+                                    launchSingleTop = true
+                                }
+                            },
                         )
                     }
                     composable<SearchRoute> { backStackEntry ->
+                        val route = backStackEntry.toRoute<SearchRoute>()
                         val searchViewModel = ViewModelProvider(
                             backStackEntry,
-                            SearchViewModelFactory(searchRepository),
+                            SearchViewModelFactory(
+                                repository = searchRepository,
+                                initialQuery = route.q,
+                                initialArea = route.area,
+                                initialType = route.type,
+                                initialBudgetMin = route.budgetMin,
+                                initialBudgetMax = route.budgetMax,
+                            ),
                         )[SearchViewModel::class.java]
 
                         SearchScreen(

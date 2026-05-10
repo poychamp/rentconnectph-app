@@ -26,10 +26,11 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -39,9 +40,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,14 +56,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ph.rentconnect.app.R
+import ph.rentconnect.app.core.persistence.ThemeMode
 import ph.rentconnect.app.feature.home.data.CatalogItem
 import ph.rentconnect.app.feature.home.ui.components.HeroSection
-import androidx.compose.material.icons.filled.LightMode
-import kotlinx.coroutines.launch
-import ph.rentconnect.app.core.persistence.ThemeMode
 import ph.rentconnect.app.feature.home.ui.components.ListingCard
 import ph.rentconnect.app.ui.theme.Orange500
+
+private const val DEBOUNCE_MS = 1000L
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,9 +76,68 @@ fun HomeScreen(
     onThemeToggle: suspend (ThemeMode) -> Unit,
     onListingClick: (String) -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
+    onNavigateToSearchWithFilters: (
+        q: String?,
+        area: String?,
+        type: String?,
+        budgetMin: Int?,
+        budgetMax: Int?,
+    ) -> Unit = { _, _, _, _, _ -> },
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+
+    // Local filter state for debounce
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedArea by remember { mutableStateOf<String?>(null) }
+    var budgetMin by remember { mutableStateOf<Int?>(null) }
+    var budgetMax by remember { mutableStateOf<Int?>(null) }
+    var selectedTypes by remember { mutableStateOf<List<String>>(emptyList()) }
+
+    // Debounce timers
+    val scope = rememberCoroutineScope()
+    var searchJob by remember { mutableStateOf<Job?>(null) }
+    var typeJob by remember { mutableStateOf<Job?>(null) }
+
+    fun scheduleSearchNavigation() {
+        searchJob?.cancel()
+        searchJob = scope.launch {
+            delay(DEBOUNCE_MS)
+            onNavigateToSearchWithFilters(
+                searchQuery.ifBlank { null },
+                selectedArea,
+                selectedTypes.takeIf { it.isNotEmpty() }?.joinToString(","),
+                budgetMin,
+                budgetMax,
+            )
+        }
+    }
+
+    fun scheduleTypeNavigation() {
+        typeJob?.cancel()
+        typeJob = scope.launch {
+            delay(DEBOUNCE_MS)
+            onNavigateToSearchWithFilters(
+                searchQuery.ifBlank { null },
+                selectedArea,
+                selectedTypes.takeIf { it.isNotEmpty() }?.joinToString(","),
+                budgetMin,
+                budgetMax,
+            )
+        }
+    }
+
+    fun submitNow() {
+        searchJob?.cancel()
+        typeJob?.cancel()
+        onNavigateToSearchWithFilters(
+            searchQuery.ifBlank { null },
+            selectedArea,
+            selectedTypes.takeIf { it.isNotEmpty() }?.joinToString(","),
+            budgetMin,
+            budgetMax,
+        )
+    }
 
     Scaffold(
         topBar = { LogoTopBar(themeMode = themeMode, onThemeToggle = onThemeToggle) },
@@ -90,7 +153,42 @@ fun HomeScreen(
             when (val state = uiState) {
                 is HomeUiState.Loading -> LoadingContent(PaddingValues())
                 is HomeUiState.Error -> ErrorContent(PaddingValues(), onRetry = viewModel::refresh)
-                is HomeUiState.Success -> SuccessContent(PaddingValues(), state, onListingClick)
+                is HomeUiState.Success -> SuccessContent(
+                    padding = PaddingValues(),
+                    state = state,
+                    onListingClick = onListingClick,
+                    searchQuery = searchQuery,
+                    selectedArea = selectedArea,
+                    budgetMin = budgetMin,
+                    budgetMax = budgetMax,
+                    selectedTypes = selectedTypes,
+                    onSearchQueryChange = { query ->
+                        searchQuery = query
+                        scheduleSearchNavigation()
+                    },
+                    onAreaChange = { area ->
+                        selectedArea = area
+                        scheduleSearchNavigation()
+                    },
+                    onBudgetChange = { min, max ->
+                        budgetMin = min
+                        budgetMax = max
+                        scheduleSearchNavigation()
+                    },
+                    onTypeToggle = { type ->
+                        selectedTypes = if (type in selectedTypes) {
+                            selectedTypes - type
+                        } else {
+                            selectedTypes + type
+                        }
+                        scheduleTypeNavigation()
+                    },
+                    onClearTypes = {
+                        selectedTypes = emptyList()
+                        scheduleTypeNavigation()
+                    },
+                    onSubmit = ::submitNow,
+                )
             }
         }
     }
@@ -250,22 +348,48 @@ private fun ErrorContent(padding: PaddingValues, onRetry: () -> Unit) {
 }
 
 @Composable
-private fun SuccessContent(padding: PaddingValues, state: HomeUiState.Success, onListingClick: (String) -> Unit) {
-    var selectedType by remember { mutableStateOf<String?>(null) }
-
+private fun SuccessContent(
+    padding: PaddingValues,
+    state: HomeUiState.Success,
+    onListingClick: (String) -> Unit,
+    searchQuery: String,
+    selectedArea: String?,
+    budgetMin: Int?,
+    budgetMax: Int?,
+    selectedTypes: List<String>,
+    onSearchQueryChange: (String) -> Unit,
+    onAreaChange: (String?) -> Unit,
+    onBudgetChange: (Int?, Int?) -> Unit,
+    onTypeToggle: (String) -> Unit,
+    onClearTypes: () -> Unit,
+    onSubmit: () -> Unit,
+) {
     LazyColumn(
         contentPadding = padding,
         modifier = Modifier.fillMaxSize(),
     ) {
         // Hero
-        item { HeroSection(barangays = state.catalogs.barangays) }
+        item {
+            HeroSection(
+                barangays = state.catalogs.barangays,
+                searchQuery = searchQuery,
+                selectedArea = selectedArea,
+                budgetMin = budgetMin,
+                budgetMax = budgetMax,
+                onSearchQueryChange = onSearchQueryChange,
+                onAreaChange = onAreaChange,
+                onBudgetChange = onBudgetChange,
+                onSubmit = onSubmit,
+            )
+        }
 
         // Property type chips
         item {
             PropertyTypeChips(
                 types = state.catalogs.listingTypes,
-                selectedType = selectedType,
-                onTypeSelected = { selectedType = it },
+                selectedTypes = selectedTypes,
+                onTypeToggle = onTypeToggle,
+                onClearTypes = onClearTypes,
             )
         }
 
@@ -308,8 +432,9 @@ private fun SuccessContent(padding: PaddingValues, state: HomeUiState.Success, o
 @Composable
 private fun PropertyTypeChips(
     types: List<CatalogItem>,
-    selectedType: String?,
-    onTypeSelected: (String?) -> Unit,
+    selectedTypes: List<String>,
+    onTypeToggle: (String) -> Unit,
+    onClearTypes: () -> Unit,
 ) {
     LazyRow(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
@@ -318,8 +443,8 @@ private fun PropertyTypeChips(
         // "All" chip
         item {
             FilterChip(
-                selected = selectedType == null,
-                onClick = { onTypeSelected(null) },
+                selected = selectedTypes.isEmpty(),
+                onClick = onClearTypes,
                 label = {
                     Text(
                         text = "All",
@@ -336,14 +461,14 @@ private fun PropertyTypeChips(
                     borderColor = MaterialTheme.colorScheme.outline,
                     selectedBorderColor = Orange500,
                     enabled = true,
-                    selected = selectedType == null,
+                    selected = selectedTypes.isEmpty(),
                 ),
             )
         }
         items(types) { type ->
             FilterChip(
-                selected = selectedType == type.value,
-                onClick = { onTypeSelected(type.value) },
+                selected = type.value in selectedTypes,
+                onClick = { onTypeToggle(type.value) },
                 label = {
                     Text(
                         text = type.label,
@@ -360,7 +485,7 @@ private fun PropertyTypeChips(
                     borderColor = MaterialTheme.colorScheme.outline,
                     selectedBorderColor = Orange500,
                     enabled = true,
-                    selected = selectedType == type.value,
+                    selected = type.value in selectedTypes,
                 ),
             )
         }

@@ -1,8 +1,7 @@
 package ph.rentconnect.app.feature.home.ui.components
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,29 +9,25 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ph.rentconnect.app.R
@@ -41,8 +36,18 @@ import ph.rentconnect.app.feature.home.data.CatalogItem
 @Composable
 fun HeroSection(
     barangays: List<CatalogItem>,
+    searchQuery: String,
+    selectedArea: String?,
+    budgetMin: Int?,
+    budgetMax: Int?,
+    onSearchQueryChange: (String) -> Unit,
+    onAreaChange: (String?) -> Unit,
+    onBudgetChange: (Int?, Int?) -> Unit,
+    onSubmit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -91,15 +96,21 @@ fun HeroSection(
             Spacer(Modifier.weight(1f))
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
-                readOnly = true,
+                value = searchQuery,
+                onValueChange = onSearchQueryChange,
                 placeholder = {
                     Text(
                         text = "keywords, amenities (e.g. wifi), 1 bed, 2 baths, 30sqm",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray,
                     )
+                },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { onSearchQueryChange("") }) {
+                            Icon(Icons.Filled.Close, contentDescription = "Clear")
+                        }
+                    }
                 },
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -110,70 +121,30 @@ fun HeroSection(
                 ),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = {
+                    keyboardController?.hide()
+                    onSubmit()
+                }),
             )
 
             Spacer(Modifier.height(10.dp))
 
-            Row(modifier = Modifier.fillMaxWidth()) {
-                DropdownChip(
-                    label = "Budget",
-                    items = emptyList(),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                BudgetFilter(
+                    budgetMin = budgetMin,
+                    budgetMax = budgetMax,
+                    onBudgetChange = onBudgetChange,
                     modifier = Modifier.weight(1f),
                 )
-                Spacer(Modifier.width(8.dp))
-                DropdownChip(
-                    label = "CDO Areas",
-                    items = barangays,
+                AreaFilter(
+                    areas = barangays,
+                    selectedArea = selectedArea,
+                    onAreaChange = onAreaChange,
                     modifier = Modifier.weight(1f),
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun DropdownChip(
-    label: String,
-    items: List<CatalogItem>,
-    modifier: Modifier = Modifier,
-) {
-    var expanded by remember { mutableStateOf(false) }
-    var selected by remember { mutableStateOf<CatalogItem?>(null) }
-
-    Box(modifier = modifier) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color.White)
-                .clickable(enabled = items.isNotEmpty()) { expanded = true }
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = selected?.label ?: label,
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (selected != null) Color.Black else Color.Gray,
-                modifier = Modifier.weight(1f),
-            )
-            Icon(
-                imageVector = Icons.Filled.ArrowDropDown,
-                contentDescription = null,
-                tint = Color.Gray,
-            )
-        }
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) {
-            items.forEach { item ->
-                DropdownMenuItem(
-                    text = { Text(item.label) },
-                    onClick = {
-                        selected = item
-                        expanded = false
-                    },
                 )
             }
         }

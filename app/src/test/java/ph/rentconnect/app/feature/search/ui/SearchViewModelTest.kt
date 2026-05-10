@@ -219,6 +219,37 @@ class SearchViewModelTest {
         assertEquals(1, state.currentPage)
     }
 
+    @Test
+    fun `it uses initial filter params for first load`() = runTest {
+        val filteredResult = SearchResponse(
+            data = listOf(listing("5", "Filtered Result")),
+            meta = PaginationMeta(currentPage = 1, lastPage = 1, perPage = 24, total = 1),
+            filters = FiltersEcho(q = "wifi", area = "carmen"),
+            catalogs = defaultCatalogs(),
+        )
+        coEvery { repository.search(eq("wifi"), eq("carmen"), eq("studio"), eq(5000), eq(20000), eq(1)) } returns
+            Result.Success(filteredResult)
+
+        val vm = SearchViewModel(
+            repository = repository,
+            initialQuery = "wifi",
+            initialArea = "carmen",
+            initialType = "studio",
+            initialBudgetMin = 5000,
+            initialBudgetMax = 20000,
+        )
+        advanceUntilIdle()
+
+        val state = vm.uiState.value
+        assertEquals("wifi", state.searchQuery)
+        assertEquals("carmen", state.selectedArea)
+        assertEquals(listOf("studio"), state.selectedTypes)
+        assertEquals(5000, state.budgetMin)
+        assertEquals(20000, state.budgetMax)
+        assertEquals(1, state.items.size)
+        assertEquals("Filtered Result", state.items[0].title)
+    }
+
     private fun createViewModel() = SearchViewModel(repository)
 
     private fun listing(uuid: String, title: String) = ListingCard(

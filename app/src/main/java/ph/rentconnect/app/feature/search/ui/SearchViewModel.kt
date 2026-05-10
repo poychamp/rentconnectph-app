@@ -14,9 +14,24 @@ import ph.rentconnect.app.feature.search.data.SearchRepository
 
 private const val DEBOUNCE_MS = 1000L
 
-class SearchViewModel(private val repository: SearchRepository) : ViewModel() {
+class SearchViewModel(
+    private val repository: SearchRepository,
+    initialQuery: String? = null,
+    initialArea: String? = null,
+    initialType: String? = null,
+    initialBudgetMin: Int? = null,
+    initialBudgetMax: Int? = null,
+) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(SearchUiState())
+    private val _uiState = MutableStateFlow(
+        SearchUiState(
+            searchQuery = initialQuery ?: "",
+            selectedArea = initialArea,
+            selectedTypes = initialType?.split(",")?.filter { it.isNotBlank() } ?: emptyList(),
+            budgetMin = initialBudgetMin,
+            budgetMax = initialBudgetMax,
+        ),
+    )
     val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
 
     private val _isRefreshing = MutableStateFlow(false)
