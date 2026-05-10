@@ -83,6 +83,7 @@ fun HomeScreen(
         budgetMin: Int?,
         budgetMax: Int?,
     ) -> Unit = { _, _, _, _, _ -> },
+    onNavigateToAbout: () -> Unit = {},
     onNavigateToContact: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -142,7 +143,7 @@ fun HomeScreen(
 
     Scaffold(
         topBar = { LogoTopBar(themeMode = themeMode, onThemeToggle = onThemeToggle) },
-        bottomBar = { AppBottomBar(onNavigateToSearch = onNavigateToSearch, onNavigateToContact = onNavigateToContact) },
+        bottomBar = { AppBottomBar(onNavigateToSearch = onNavigateToSearch, onNavigateToAbout = onNavigateToAbout, onNavigateToContact = onNavigateToContact) },
     ) { padding ->
         PullToRefreshBox(
             isRefreshing = isRefreshing,
@@ -254,7 +255,7 @@ private fun LogoTopBar(
 }
 
 @Composable
-private fun AppBottomBar(onNavigateToSearch: () -> Unit, onNavigateToContact: () -> Unit) {
+private fun AppBottomBar(onNavigateToSearch: () -> Unit, onNavigateToAbout: () -> Unit, onNavigateToContact: () -> Unit) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
@@ -287,7 +288,7 @@ private fun AppBottomBar(onNavigateToSearch: () -> Unit, onNavigateToContact: ()
         )
         NavigationBarItem(
             selected = false,
-            onClick = {},
+            onClick = onNavigateToAbout,
             icon = { Icon(Icons.Filled.Info, contentDescription = "About") },
             label = { Text("About", style = MaterialTheme.typography.labelSmall) },
             colors = NavigationBarItemDefaults.colors(

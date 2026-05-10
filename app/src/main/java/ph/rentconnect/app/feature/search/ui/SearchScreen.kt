@@ -81,6 +81,7 @@ fun SearchScreen(
     onThemeToggle: suspend (ThemeMode) -> Unit,
     onListingClick: (String) -> Unit = {},
     onNavigateToHome: () -> Unit = {},
+    onNavigateToAbout: () -> Unit = {},
     onNavigateToContact: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -88,7 +89,7 @@ fun SearchScreen(
 
     Scaffold(
         topBar = { SearchTopBar(themeMode = themeMode, onThemeToggle = onThemeToggle) },
-        bottomBar = { SearchBottomBar(onNavigateToHome = onNavigateToHome, onNavigateToContact = onNavigateToContact) },
+        bottomBar = { SearchBottomBar(onNavigateToHome = onNavigateToHome, onNavigateToAbout = onNavigateToAbout, onNavigateToContact = onNavigateToContact) },
     ) { padding ->
         PullToRefreshBox(
             isRefreshing = isRefreshing,
@@ -180,7 +181,7 @@ private fun SearchTopBar(
 }
 
 @Composable
-private fun SearchBottomBar(onNavigateToHome: () -> Unit, onNavigateToContact: () -> Unit) {
+private fun SearchBottomBar(onNavigateToHome: () -> Unit, onNavigateToAbout: () -> Unit, onNavigateToContact: () -> Unit) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
@@ -213,7 +214,7 @@ private fun SearchBottomBar(onNavigateToHome: () -> Unit, onNavigateToContact: (
         )
         NavigationBarItem(
             selected = false,
-            onClick = {},
+            onClick = onNavigateToAbout,
             icon = { Icon(Icons.Filled.Info, contentDescription = "About") },
             label = { Text("About", style = MaterialTheme.typography.labelSmall) },
             colors = NavigationBarItemDefaults.colors(

@@ -71,6 +71,7 @@ fun ContactScreen(
     onThemeToggle: suspend (ThemeMode) -> Unit,
     onNavigateToHome: () -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
+    onNavigateToAbout: () -> Unit = {},
     onContactSuccess: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -84,6 +85,7 @@ fun ContactScreen(
             ContactBottomBar(
                 onNavigateToHome = onNavigateToHome,
                 onNavigateToSearch = onNavigateToSearch,
+                onNavigateToAbout = onNavigateToAbout,
             )
         },
     ) { padding ->
@@ -403,6 +405,7 @@ private fun ContactFormContent(
 private fun ContactBottomBar(
     onNavigateToHome: () -> Unit,
     onNavigateToSearch: () -> Unit,
+    onNavigateToAbout: () -> Unit,
 ) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
@@ -436,7 +439,7 @@ private fun ContactBottomBar(
         )
         NavigationBarItem(
             selected = false,
-            onClick = {},
+            onClick = onNavigateToAbout,
             icon = { Icon(Icons.Filled.Info, contentDescription = "About") },
             label = { Text("About", style = MaterialTheme.typography.labelSmall) },
             colors = NavigationBarItemDefaults.colors(

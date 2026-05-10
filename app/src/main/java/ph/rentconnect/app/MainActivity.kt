@@ -23,6 +23,7 @@ import ph.rentconnect.app.feature.detail.data.InquiryApi
 import ph.rentconnect.app.feature.detail.data.InquiryRepository
 import ph.rentconnect.app.feature.detail.data.ListingDetailApi
 import ph.rentconnect.app.feature.detail.data.ListingDetailRepository
+import ph.rentconnect.app.feature.about.ui.AboutScreen
 import ph.rentconnect.app.feature.contact.data.ContactApi
 import ph.rentconnect.app.feature.contact.data.ContactRepository
 import ph.rentconnect.app.feature.contact.ui.ContactScreen
@@ -64,6 +65,9 @@ data class DetailRoute(val uuid: String)
 
 @Serializable
 data class InquirySuccessRoute(val listingName: String)
+
+@Serializable
+data object AboutRoute
 
 @Serializable
 data object ContactRoute
@@ -134,6 +138,12 @@ class MainActivity : ComponentActivity() {
                                     launchSingleTop = true
                                 }
                             },
+                            onNavigateToAbout = {
+                                navController.navigate(AboutRoute) {
+                                    popUpTo(HomeRoute) { saveState = true }
+                                    launchSingleTop = true
+                                }
+                            },
                             onNavigateToContact = {
                                 navController.navigate(ContactRoute) {
                                     popUpTo(HomeRoute) { saveState = true }
@@ -165,6 +175,12 @@ class MainActivity : ComponentActivity() {
                             },
                             onNavigateToHome = {
                                 navController.popBackStack(HomeRoute, inclusive = false)
+                            },
+                            onNavigateToAbout = {
+                                navController.navigate(AboutRoute) {
+                                    popUpTo(HomeRoute) { saveState = true }
+                                    launchSingleTop = true
+                                }
                             },
                             onNavigateToContact = {
                                 navController.navigate(ContactRoute) {
@@ -208,6 +224,34 @@ class MainActivity : ComponentActivity() {
                             },
                         )
                     }
+                    composable<AboutRoute> {
+                        AboutScreen(
+                            themeMode = themeMode,
+                            onThemeToggle = themePreferences::setThemeMode,
+                            onNavigateToHome = {
+                                navController.popBackStack(HomeRoute, inclusive = false)
+                            },
+                            onNavigateToSearch = {
+                                navController.navigate(SearchRoute()) {
+                                    popUpTo(HomeRoute) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            onNavigateToContact = {
+                                navController.navigate(ContactRoute) {
+                                    popUpTo(HomeRoute) { saveState = true }
+                                    launchSingleTop = true
+                                }
+                            },
+                            onBrowseListings = {
+                                navController.navigate(SearchRoute()) {
+                                    popUpTo(HomeRoute) { saveState = true }
+                                    launchSingleTop = true
+                                }
+                            },
+                        )
+                    }
                     composable<ContactRoute> { backStackEntry ->
                         val contactViewModel = ViewModelProvider(
                             backStackEntry,
@@ -226,6 +270,12 @@ class MainActivity : ComponentActivity() {
                                     popUpTo(HomeRoute) { saveState = true }
                                     launchSingleTop = true
                                     restoreState = true
+                                }
+                            },
+                            onNavigateToAbout = {
+                                navController.navigate(AboutRoute) {
+                                    popUpTo(HomeRoute) { saveState = true }
+                                    launchSingleTop = true
                                 }
                             },
                             onContactSuccess = {
