@@ -69,7 +69,7 @@ fun ListingCard(
                 )
 
                 // Verified badge
-                if (listing.section == "verified") {
+                if (listing.section?.equals("verified", ignoreCase = true) == true) {
                     Row(
                         modifier = Modifier
                             .padding(12.dp)
@@ -141,7 +141,7 @@ fun ListingCard(
                             .padding(horizontal = 10.dp, vertical = 4.dp),
                     ) {
                         Text(
-                            text = listing.typeLabel.uppercase(),
+                            text = listing.typeLabel?.uppercase() ?: "",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -162,7 +162,7 @@ fun ListingCard(
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = "${listing.barangayLabel}, CDO",
+                        text = listing.barangayLabel?.let { "$it, CDO" } ?: "CDO",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -190,13 +190,18 @@ fun ListingCard(
                 Spacer(Modifier.height(8.dp))
 
                 // Specs row
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    SpecItem(Icons.Filled.KingBed, "${listing.beds} bed")
-                    SpecItem(Icons.Filled.Bathtub, "${listing.baths} bath")
-                    SpecItem(Icons.Filled.CropSquare, "${listing.sqm} sqm")
+                val specs = buildList {
+                    listing.beds?.takeIf { it > 0 }?.let { add(Icons.Filled.KingBed to "$it bed") }
+                    listing.baths?.takeIf { it > 0 }?.let { add(Icons.Filled.Bathtub to "$it bath") }
+                    listing.sqm?.takeIf { it > 0 }?.let { add(Icons.Filled.CropSquare to "$it sqm") }
+                }
+                if (specs.isNotEmpty()) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        specs.forEach { (icon, text) -> SpecItem(icon, text) }
+                    }
                 }
             }
         }

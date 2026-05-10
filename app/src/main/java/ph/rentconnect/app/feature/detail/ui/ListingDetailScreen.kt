@@ -42,11 +42,13 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -76,6 +78,7 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListingDetailScreen(
     viewModel: ListingDetailViewModel,
@@ -84,15 +87,24 @@ fun ListingDetailScreen(
     onBack: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = { DetailTopBar(themeMode = themeMode, onThemeToggle = onThemeToggle, onBack = onBack) },
     ) { padding ->
-        when (val state = uiState) {
-            is ListingDetailUiState.Loading -> LoadingContent(padding)
-            is ListingDetailUiState.NotFound -> NotFoundContent(padding, onBack)
-            is ListingDetailUiState.Error -> ErrorContent(padding, onRetry = viewModel::retry)
-            is ListingDetailUiState.Success -> DetailContent(padding, state.listing)
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = viewModel::refresh,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+        ) {
+            when (val state = uiState) {
+                is ListingDetailUiState.Loading -> LoadingContent(PaddingValues())
+                is ListingDetailUiState.NotFound -> NotFoundContent(PaddingValues(), onBack)
+                is ListingDetailUiState.Error -> ErrorContent(PaddingValues(), onRetry = viewModel::retry)
+                is ListingDetailUiState.Success -> DetailContent(PaddingValues(), state.listing)
+            }
         }
     }
 }

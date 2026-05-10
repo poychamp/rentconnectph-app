@@ -13,12 +13,26 @@ class HomeViewModel(private val repository: HomeRepository) : ViewModel() {
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing
+
     init {
         loadHome()
     }
 
     fun refresh() {
-        loadHome()
+        _isRefreshing.value = true
+        viewModelScope.launch {
+            _uiState.value = when (val result = repository.getHome()) {
+                is Result.Success -> HomeUiState.Success(
+                    featured = result.data.featured,
+                    recently = result.data.recently,
+                    catalogs = result.data.catalogs,
+                )
+                is Result.Failure -> HomeUiState.Error(result.error)
+            }
+            _isRefreshing.value = false
+        }
     }
 
     private fun loadHome() {

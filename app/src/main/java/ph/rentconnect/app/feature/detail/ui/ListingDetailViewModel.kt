@@ -17,12 +17,29 @@ class ListingDetailViewModel(
     private val _uiState = MutableStateFlow<ListingDetailUiState>(ListingDetailUiState.Loading)
     val uiState: StateFlow<ListingDetailUiState> = _uiState
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing
+
     init {
         loadListing()
     }
 
     fun retry() {
         loadListing()
+    }
+
+    fun refresh() {
+        _isRefreshing.value = true
+        viewModelScope.launch {
+            _uiState.value = when (val result = repository.getListing(uuid)) {
+                is Result.Success -> ListingDetailUiState.Success(result.data)
+                is Result.Failure -> when (result.error) {
+                    is ApiError.NotFound -> ListingDetailUiState.NotFound
+                    else -> ListingDetailUiState.Error(result.error)
+                }
+            }
+            _isRefreshing.value = false
+        }
     }
 
     private fun loadListing() {

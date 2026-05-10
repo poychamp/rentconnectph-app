@@ -18,14 +18,14 @@ data class ListingCard(
     val type: String,
     @SerialName("type_label") val typeLabel: String,
     @SerialName("price_monthly") val priceMonthly: Int? = null,
-    val beds: Int,
-    val baths: Int,
-    val sqm: Int,
-    val barangay: String,
-    @SerialName("barangay_label") val barangayLabel: String,
+    val beds: Int? = null,
+    val baths: Int? = null,
+    val sqm: Int? = null,
+    val barangay: String? = null,
+    @SerialName("barangay_label") val barangayLabel: String? = null,
     val image: String? = null,
-    @SerialName("image_count") val imageCount: Int,
-    val section: String,
+    @SerialName("image_count") val imageCount: Int = 0,
+    val section: String? = null,
 )
 
 @Serializable

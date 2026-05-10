@@ -27,6 +27,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -38,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -64,6 +66,7 @@ import ph.rentconnect.app.core.persistence.ThemeMode
 import ph.rentconnect.app.feature.home.ui.components.ListingCard
 import ph.rentconnect.app.ui.theme.Orange500
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
@@ -72,15 +75,24 @@ fun HomeScreen(
     onListingClick: (String) -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = { LogoTopBar(themeMode = themeMode, onThemeToggle = onThemeToggle) },
         bottomBar = { AppBottomBar() },
     ) { padding ->
-        when (val state = uiState) {
-            is HomeUiState.Loading -> LoadingContent(padding)
-            is HomeUiState.Error -> ErrorContent(padding, onRetry = viewModel::refresh)
-            is HomeUiState.Success -> SuccessContent(padding, state, onListingClick)
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = viewModel::refresh,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+        ) {
+            when (val state = uiState) {
+                is HomeUiState.Loading -> LoadingContent(PaddingValues())
+                is HomeUiState.Error -> ErrorContent(PaddingValues(), onRetry = viewModel::refresh)
+                is HomeUiState.Success -> SuccessContent(PaddingValues(), state, onListingClick)
+            }
         }
     }
 }
@@ -248,7 +260,7 @@ private fun SuccessContent(padding: PaddingValues, state: HomeUiState.Success, o
                 subtitle = "Hand-picked by RentConnectPH",
             )
         }
-        items(state.featured, key = { it.uuid }) { listing ->
+        items(state.featured, key = { "featured_${it.uuid}" }) { listing ->
             ListingCard(listing, onClick = { onListingClick(listing.uuid) })
         }
 
@@ -268,7 +280,7 @@ private fun SuccessContent(padding: PaddingValues, state: HomeUiState.Success, o
                 actionLabel = "View all →",
             )
         }
-        items(state.recently, key = { it.uuid }) { listing ->
+        items(state.recently, key = { "recently_${it.uuid}" }) { listing ->
             ListingCard(listing, onClick = { onListingClick(listing.uuid) })
         }
 
