@@ -35,9 +35,6 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import ph.rentconnect.app.feature.home.data.ListingCard as ListingCardData
 import ph.rentconnect.app.ui.theme.Green500
-import ph.rentconnect.app.ui.theme.Gray200
-import ph.rentconnect.app.ui.theme.Gray500
-import ph.rentconnect.app.ui.theme.Gray600
 import ph.rentconnect.app.ui.theme.Orange500
 
 @Composable
@@ -136,16 +133,6 @@ fun ListingCard(
                     Box(
                         modifier = Modifier
                             .background(
-                                Color.Transparent,
-                                RoundedCornerShape(6.dp),
-                            )
-                            .then(
-                                Modifier.background(
-                                    Color.Transparent,
-                                    RoundedCornerShape(6.dp),
-                                )
-                            )
-                            .background(
                                 MaterialTheme.colorScheme.surfaceVariant,
                                 RoundedCornerShape(6.dp),
                             )
@@ -155,7 +142,7 @@ fun ListingCard(
                             text = listing.typeLabel.uppercase(),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Medium,
-                            color = Gray600,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 11.sp,
                         )
                     }
@@ -175,7 +162,7 @@ fun ListingCard(
                     Text(
                         text = "${listing.barangayLabel}, CDO",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Gray500,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
 
@@ -193,7 +180,7 @@ fun ListingCard(
                     Text(
                         text = "/mo",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Gray500,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(bottom = 1.dp),
                     )
                 }
@@ -223,14 +210,14 @@ private fun SpecItem(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = Gray500,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(16.dp),
         )
         Spacer(Modifier.width(4.dp))
         Text(
             text = text,
             style = MaterialTheme.typography.bodySmall,
-            color = Gray500,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

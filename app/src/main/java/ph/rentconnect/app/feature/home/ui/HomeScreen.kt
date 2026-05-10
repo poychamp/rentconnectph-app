@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
@@ -57,16 +58,22 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ph.rentconnect.app.R
 import ph.rentconnect.app.feature.home.data.CatalogItem
 import ph.rentconnect.app.feature.home.ui.components.HeroSection
+import androidx.compose.material.icons.filled.LightMode
+import kotlinx.coroutines.launch
+import ph.rentconnect.app.core.persistence.ThemeMode
 import ph.rentconnect.app.feature.home.ui.components.ListingCard
-import ph.rentconnect.app.ui.theme.Gray500
 import ph.rentconnect.app.ui.theme.Orange500
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel) {
+fun HomeScreen(
+    viewModel: HomeViewModel,
+    themeMode: ThemeMode,
+    onThemeToggle: suspend (ThemeMode) -> Unit,
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
-        topBar = { LogoTopBar() },
+        topBar = { LogoTopBar(themeMode = themeMode, onThemeToggle = onThemeToggle) },
         bottomBar = { AppBottomBar() },
     ) { padding ->
         when (val state = uiState) {
@@ -78,7 +85,12 @@ fun HomeScreen(viewModel: HomeViewModel) {
 }
 
 @Composable
-private fun LogoTopBar() {
+private fun LogoTopBar(
+    themeMode: ThemeMode,
+    onThemeToggle: suspend (ThemeMode) -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -109,10 +121,21 @@ private fun LogoTopBar() {
                 color = Orange500,
             )
         }
-        IconButton(onClick = { }) {
+        IconButton(onClick = {
+            val next = when (themeMode) {
+                ThemeMode.System -> ThemeMode.Dark
+                ThemeMode.Dark -> ThemeMode.Light
+                ThemeMode.Light -> ThemeMode.System
+            }
+            scope.launch { onThemeToggle(next) }
+        }) {
             Icon(
-                imageVector = Icons.Filled.DarkMode,
-                contentDescription = "Toggle dark mode",
+                imageVector = when (themeMode) {
+                    ThemeMode.System -> Icons.Filled.LightMode
+                    ThemeMode.Light -> Icons.Filled.LightMode
+                    ThemeMode.Dark -> Icons.Filled.DarkMode
+                },
+                contentDescription = "Toggle theme",
                 tint = MaterialTheme.colorScheme.onSurface,
             )
         }
@@ -152,8 +175,8 @@ private fun AppBottomBar() {
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = Orange500,
                     selectedTextColor = Orange500,
-                    unselectedIconColor = Gray500,
-                    unselectedTextColor = Gray500,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     indicatorColor = Color.Transparent,
                 ),
             )
@@ -347,7 +370,7 @@ private fun SectionHeader(
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodySmall,
-            color = Gray500,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
