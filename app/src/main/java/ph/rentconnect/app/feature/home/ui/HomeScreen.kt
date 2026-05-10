@@ -83,6 +83,7 @@ fun HomeScreen(
         budgetMin: Int?,
         budgetMax: Int?,
     ) -> Unit = { _, _, _, _, _ -> },
+    onNavigateToContact: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
@@ -141,7 +142,7 @@ fun HomeScreen(
 
     Scaffold(
         topBar = { LogoTopBar(themeMode = themeMode, onThemeToggle = onThemeToggle) },
-        bottomBar = { AppBottomBar(onNavigateToSearch = onNavigateToSearch) },
+        bottomBar = { AppBottomBar(onNavigateToSearch = onNavigateToSearch, onNavigateToContact = onNavigateToContact) },
     ) { padding ->
         PullToRefreshBox(
             isRefreshing = isRefreshing,
@@ -253,7 +254,7 @@ private fun LogoTopBar(
 }
 
 @Composable
-private fun AppBottomBar(onNavigateToSearch: () -> Unit) {
+private fun AppBottomBar(onNavigateToSearch: () -> Unit, onNavigateToContact: () -> Unit) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
@@ -299,7 +300,7 @@ private fun AppBottomBar(onNavigateToSearch: () -> Unit) {
         )
         NavigationBarItem(
             selected = false,
-            onClick = {},
+            onClick = onNavigateToContact,
             icon = { Icon(Icons.Filled.Email, contentDescription = "Contact") },
             label = { Text("Contact", style = MaterialTheme.typography.labelSmall) },
             colors = NavigationBarItemDefaults.colors(

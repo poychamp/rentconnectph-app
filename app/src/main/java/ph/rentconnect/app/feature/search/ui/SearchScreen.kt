@@ -81,13 +81,14 @@ fun SearchScreen(
     onThemeToggle: suspend (ThemeMode) -> Unit,
     onListingClick: (String) -> Unit = {},
     onNavigateToHome: () -> Unit = {},
+    onNavigateToContact: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = { SearchTopBar(themeMode = themeMode, onThemeToggle = onThemeToggle) },
-        bottomBar = { SearchBottomBar(onNavigateToHome = onNavigateToHome) },
+        bottomBar = { SearchBottomBar(onNavigateToHome = onNavigateToHome, onNavigateToContact = onNavigateToContact) },
     ) { padding ->
         PullToRefreshBox(
             isRefreshing = isRefreshing,
@@ -179,7 +180,7 @@ private fun SearchTopBar(
 }
 
 @Composable
-private fun SearchBottomBar(onNavigateToHome: () -> Unit) {
+private fun SearchBottomBar(onNavigateToHome: () -> Unit, onNavigateToContact: () -> Unit) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
@@ -225,7 +226,7 @@ private fun SearchBottomBar(onNavigateToHome: () -> Unit) {
         )
         NavigationBarItem(
             selected = false,
-            onClick = {},
+            onClick = onNavigateToContact,
             icon = { Icon(Icons.Filled.Email, contentDescription = "Contact") },
             label = { Text("Contact", style = MaterialTheme.typography.labelSmall) },
             colors = NavigationBarItemDefaults.colors(

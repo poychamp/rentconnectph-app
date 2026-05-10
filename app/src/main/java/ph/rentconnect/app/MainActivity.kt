@@ -23,6 +23,12 @@ import ph.rentconnect.app.feature.detail.data.InquiryApi
 import ph.rentconnect.app.feature.detail.data.InquiryRepository
 import ph.rentconnect.app.feature.detail.data.ListingDetailApi
 import ph.rentconnect.app.feature.detail.data.ListingDetailRepository
+import ph.rentconnect.app.feature.contact.data.ContactApi
+import ph.rentconnect.app.feature.contact.data.ContactRepository
+import ph.rentconnect.app.feature.contact.ui.ContactScreen
+import ph.rentconnect.app.feature.contact.ui.ContactSuccessScreen
+import ph.rentconnect.app.feature.contact.ui.ContactViewModel
+import ph.rentconnect.app.feature.contact.ui.ContactViewModelFactory
 import ph.rentconnect.app.feature.detail.ui.InquirySuccessScreen
 import ph.rentconnect.app.feature.detail.ui.ListingDetailScreen
 import ph.rentconnect.app.feature.detail.ui.ListingDetailViewModel
@@ -59,6 +65,12 @@ data class DetailRoute(val uuid: String)
 @Serializable
 data class InquirySuccessRoute(val listingName: String)
 
+@Serializable
+data object ContactRoute
+
+@Serializable
+data object ContactSuccessRoute
+
 class MainActivity : ComponentActivity() {
 
     private val themePreferences by lazy { ThemePreferences(applicationContext) }
@@ -77,6 +89,7 @@ class MainActivity : ComponentActivity() {
         val detailRepository = ListingDetailRepository(retrofit.create(ListingDetailApi::class.java))
         val inquiryRepository = InquiryRepository(retrofit.create(InquiryApi::class.java), json)
         val searchRepository = SearchRepository(retrofit.create(SearchApi::class.java))
+        val contactRepository = ContactRepository(retrofit.create(ContactApi::class.java), json)
 
         setContent {
             val themeMode by themePreferences.themeMode
@@ -121,6 +134,12 @@ class MainActivity : ComponentActivity() {
                                     launchSingleTop = true
                                 }
                             },
+                            onNavigateToContact = {
+                                navController.navigate(ContactRoute) {
+                                    popUpTo(HomeRoute) { saveState = true }
+                                    launchSingleTop = true
+                                }
+                            },
                         )
                     }
                     composable<SearchRoute> { backStackEntry ->
@@ -146,6 +165,12 @@ class MainActivity : ComponentActivity() {
                             },
                             onNavigateToHome = {
                                 navController.popBackStack(HomeRoute, inclusive = false)
+                            },
+                            onNavigateToContact = {
+                                navController.navigate(ContactRoute) {
+                                    popUpTo(HomeRoute) { saveState = true }
+                                    launchSingleTop = true
+                                }
                             },
                         )
                     }
@@ -176,6 +201,55 @@ class MainActivity : ComponentActivity() {
                             onThemeToggle = themePreferences::setThemeMode,
                             onBack = { navController.popBackStack() },
                             onBrowseMore = {
+                                navController.navigate(SearchRoute()) {
+                                    popUpTo(HomeRoute) { saveState = true }
+                                    launchSingleTop = true
+                                }
+                            },
+                        )
+                    }
+                    composable<ContactRoute> { backStackEntry ->
+                        val contactViewModel = ViewModelProvider(
+                            backStackEntry,
+                            ContactViewModelFactory(contactRepository),
+                        )[ContactViewModel::class.java]
+
+                        ContactScreen(
+                            viewModel = contactViewModel,
+                            themeMode = themeMode,
+                            onThemeToggle = themePreferences::setThemeMode,
+                            onNavigateToHome = {
+                                navController.popBackStack(HomeRoute, inclusive = false)
+                            },
+                            onNavigateToSearch = {
+                                navController.navigate(SearchRoute()) {
+                                    popUpTo(HomeRoute) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            onContactSuccess = {
+                                navController.navigate(ContactSuccessRoute) {
+                                    popUpTo(ContactRoute) { inclusive = true }
+                                    launchSingleTop = true
+                                }
+                            },
+                        )
+                    }
+                    composable<ContactSuccessRoute> {
+                        ContactSuccessScreen(
+                            themeMode = themeMode,
+                            onThemeToggle = themePreferences::setThemeMode,
+                            onBack = {
+                                navController.navigate(ContactRoute) {
+                                    popUpTo(ContactSuccessRoute) { inclusive = true }
+                                    launchSingleTop = true
+                                }
+                            },
+                            onBackToHome = {
+                                navController.popBackStack(HomeRoute, inclusive = false)
+                            },
+                            onBrowseListings = {
                                 navController.navigate(SearchRoute()) {
                                     popUpTo(HomeRoute) { saveState = true }
                                     launchSingleTop = true

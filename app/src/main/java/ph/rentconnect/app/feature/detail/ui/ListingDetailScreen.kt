@@ -630,6 +630,9 @@ private fun InquiryFormDialog(
     onSubmit: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    var nameTouched by remember { mutableStateOf(false) }
+    var phoneTouched by remember { mutableStateOf(false) }
+
     Dialog(onDismissRequest = { if (!state.isSubmitting) onDismiss() }) {
         Card(
             shape = RoundedCornerShape(16.dp),
@@ -680,7 +683,8 @@ private fun InquiryFormDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .onFocusChanged {
-                            if (it.isFocused) onFieldFocus("name") else onFieldBlur("name")
+                            if (it.isFocused) { nameTouched = true; onFieldFocus("name") }
+                            else if (nameTouched) onFieldBlur("name")
                         },
                     enabled = !state.isSubmitting,
                     isError = state.fieldErrors.containsKey("name"),
@@ -712,7 +716,8 @@ private fun InquiryFormDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .onFocusChanged {
-                            if (it.isFocused) onFieldFocus("phone") else onFieldBlur("phone")
+                            if (it.isFocused) { phoneTouched = true; onFieldFocus("phone") }
+                            else if (phoneTouched) onFieldBlur("phone")
                         },
                     enabled = !state.isSubmitting,
                     isError = state.fieldErrors.containsKey("phone"),
