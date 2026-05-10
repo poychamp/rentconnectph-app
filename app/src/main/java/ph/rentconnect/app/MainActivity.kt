@@ -23,6 +23,7 @@ import ph.rentconnect.app.feature.detail.data.InquiryApi
 import ph.rentconnect.app.feature.detail.data.InquiryRepository
 import ph.rentconnect.app.feature.detail.data.ListingDetailApi
 import ph.rentconnect.app.feature.detail.data.ListingDetailRepository
+import ph.rentconnect.app.feature.detail.ui.InquirySuccessScreen
 import ph.rentconnect.app.feature.detail.ui.ListingDetailScreen
 import ph.rentconnect.app.feature.detail.ui.ListingDetailViewModel
 import ph.rentconnect.app.feature.detail.ui.ListingDetailViewModelFactory
@@ -54,6 +55,9 @@ data class SearchRoute(
 
 @Serializable
 data class DetailRoute(val uuid: String)
+
+@Serializable
+data class InquirySuccessRoute(val listingName: String)
 
 class MainActivity : ComponentActivity() {
 
@@ -157,6 +161,26 @@ class MainActivity : ComponentActivity() {
                             themeMode = themeMode,
                             onThemeToggle = themePreferences::setThemeMode,
                             onBack = { navController.popBackStack() },
+                            onInquirySuccess = { listingName ->
+                                navController.navigate(InquirySuccessRoute(listingName)) {
+                                    launchSingleTop = true
+                                }
+                            },
+                        )
+                    }
+                    composable<InquirySuccessRoute> { backStackEntry ->
+                        val route = backStackEntry.toRoute<InquirySuccessRoute>()
+                        InquirySuccessScreen(
+                            listingName = route.listingName,
+                            themeMode = themeMode,
+                            onThemeToggle = themePreferences::setThemeMode,
+                            onBack = { navController.popBackStack() },
+                            onBrowseMore = {
+                                navController.navigate(SearchRoute()) {
+                                    popUpTo(HomeRoute) { saveState = true }
+                                    launchSingleTop = true
+                                }
+                            },
                         )
                     }
                 }

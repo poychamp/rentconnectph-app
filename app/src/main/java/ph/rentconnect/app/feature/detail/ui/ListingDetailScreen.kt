@@ -41,7 +41,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material3.AlertDialog
+
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
@@ -55,7 +55,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TextButton
+
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -97,10 +97,13 @@ fun ListingDetailScreen(
     themeMode: ThemeMode,
     onThemeToggle: suspend (ThemeMode) -> Unit,
     onBack: () -> Unit,
+    onInquirySuccess: (listingName: String) -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val inquiryState by viewModel.inquiryState.collectAsStateWithLifecycle()
+
+    val listingName = (uiState as? ListingDetailUiState.Success)?.listing?.title ?: ""
 
     when (val inquiry = inquiryState) {
         is InquiryDialogState.Visible -> {
@@ -115,7 +118,8 @@ fun ListingDetailScreen(
             )
         }
         is InquiryDialogState.Success -> {
-            InquirySuccessDialog(onDismiss = viewModel::closeInquiryDialog)
+            viewModel.closeInquiryDialog()
+            onInquirySuccess(listingName)
         }
         is InquiryDialogState.Hidden -> {}
     }
@@ -771,26 +775,6 @@ private fun InquiryFormDialog(
     }
 }
 
-@Composable
-private fun InquirySuccessDialog(onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = "Inquiry sent!",
-                fontWeight = FontWeight.Bold,
-            )
-        },
-        text = {
-            Text("Our team will give you a call shortly.")
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("OK", color = Orange500)
-            }
-        },
-    )
-}
 
 private fun formatDate(isoDate: String): String =
     try {
