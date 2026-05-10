@@ -43,7 +43,7 @@ android {
         create("dev") {
             dimension = "environment"
             applicationIdSuffix = ".dev"
-            buildConfigField("String", "BASE_URL", "\"https://dev.rentconnectph.com\"")
+            buildConfigField("String", "BASE_URL", "\"https://mirthful-antwerp-mant2tajxy69.on-vapor.com\"")
         }
         create("staging") {
             dimension = "environment"
