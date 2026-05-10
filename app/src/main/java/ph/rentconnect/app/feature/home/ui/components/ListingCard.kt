@@ -68,51 +68,47 @@ fun ListingCard(
                         .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
                 )
 
-                // Verified badge
-                if (listing.section?.equals("verified", ignoreCase = true) == true) {
-                    Row(
-                        modifier = Modifier
-                            .padding(12.dp)
-                            .background(Green500, RoundedCornerShape(6.dp))
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.CheckCircle,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(14.dp),
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(
-                            text = "VERIFIED",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 10.sp,
-                        )
-                    }
+                // Verified badge — always shown
+                Row(
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .background(Green500, RoundedCornerShape(6.dp))
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(14.dp),
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = "VERIFIED",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 10.sp,
+                    )
                 }
 
-                // Photo count badge
-                if (listing.imageCount > 0) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(12.dp)
-                            .background(
-                                Color.Black.copy(alpha = 0.6f),
-                                RoundedCornerShape(6.dp),
-                            )
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                    ) {
-                        Text(
-                            text = "${listing.imageCount} photos",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.White,
-                            fontSize = 11.sp,
+                // Photo count badge — always shown
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(12.dp)
+                        .background(
+                            Color.Black.copy(alpha = 0.6f),
+                            RoundedCornerShape(6.dp),
                         )
-                    }
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                ) {
+                    Text(
+                        text = if (listing.imageCount == 1) "1 photo" else "${listing.imageCount} photos",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White,
+                        fontSize = 11.sp,
+                    )
                 }
             }
 
@@ -141,7 +137,7 @@ fun ListingCard(
                             .padding(horizontal = 10.dp, vertical = 4.dp),
                     ) {
                         Text(
-                            text = listing.typeLabel?.uppercase() ?: "",
+                            text = listing.typeLabel.uppercase(),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -173,7 +169,7 @@ fun ListingCard(
                 // Price
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(
-                        text = listing.priceMonthly?.let { "₱${"%,d".format(it)}" } ?: "Price TBD",
+                        text = "₱${"%,d".format(listing.priceMonthly ?: 0)}",
                         style = MaterialTheme.typography.titleLarge,
                         color = Orange500,
                         fontWeight = FontWeight.Bold,

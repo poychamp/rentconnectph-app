@@ -29,12 +29,20 @@ import ph.rentconnect.app.feature.home.data.HomeRepository
 import ph.rentconnect.app.feature.home.ui.HomeScreen
 import ph.rentconnect.app.feature.home.ui.HomeViewModel
 import ph.rentconnect.app.feature.home.ui.HomeViewModelFactory
+import ph.rentconnect.app.feature.search.data.SearchApi
+import ph.rentconnect.app.feature.search.data.SearchRepository
+import ph.rentconnect.app.feature.search.ui.SearchScreen
+import ph.rentconnect.app.feature.search.ui.SearchViewModel
+import ph.rentconnect.app.feature.search.ui.SearchViewModelFactory
 import ph.rentconnect.app.ui.theme.RentConnectAppTheme
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
 @Serializable
 data object HomeRoute
+
+@Serializable
+data object SearchRoute
 
 @Serializable
 data class DetailRoute(val uuid: String)
@@ -54,6 +62,7 @@ class MainActivity : ComponentActivity() {
         )[HomeViewModel::class.java]
 
         val detailRepository = ListingDetailRepository(retrofit.create(ListingDetailApi::class.java))
+        val searchRepository = SearchRepository(retrofit.create(SearchApi::class.java))
 
         setContent {
             val themeMode by themePreferences.themeMode
@@ -76,6 +85,31 @@ class MainActivity : ComponentActivity() {
                             onThemeToggle = themePreferences::setThemeMode,
                             onListingClick = { uuid ->
                                 navController.navigate(DetailRoute(uuid))
+                            },
+                            onNavigateToSearch = {
+                                navController.navigate(SearchRoute) {
+                                    popUpTo(HomeRoute) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                        )
+                    }
+                    composable<SearchRoute> { backStackEntry ->
+                        val searchViewModel = ViewModelProvider(
+                            backStackEntry,
+                            SearchViewModelFactory(searchRepository),
+                        )[SearchViewModel::class.java]
+
+                        SearchScreen(
+                            viewModel = searchViewModel,
+                            themeMode = themeMode,
+                            onThemeToggle = themePreferences::setThemeMode,
+                            onListingClick = { uuid ->
+                                navController.navigate(DetailRoute(uuid))
+                            },
+                            onNavigateToHome = {
+                                navController.popBackStack(HomeRoute, inclusive = false)
                             },
                         )
                     }

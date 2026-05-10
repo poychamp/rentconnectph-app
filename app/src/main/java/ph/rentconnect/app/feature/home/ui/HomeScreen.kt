@@ -44,14 +44,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -73,13 +71,14 @@ fun HomeScreen(
     themeMode: ThemeMode,
     onThemeToggle: suspend (ThemeMode) -> Unit,
     onListingClick: (String) -> Unit = {},
+    onNavigateToSearch: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = { LogoTopBar(themeMode = themeMode, onThemeToggle = onThemeToggle) },
-        bottomBar = { AppBottomBar() },
+        bottomBar = { AppBottomBar(onNavigateToSearch = onNavigateToSearch) },
     ) { padding ->
         PullToRefreshBox(
             isRefreshing = isRefreshing,
@@ -156,48 +155,65 @@ private fun LogoTopBar(
 }
 
 @Composable
-private fun AppBottomBar() {
-    var selectedIndex by remember { mutableIntStateOf(0) }
-    val items = listOf(
-        BottomNavItem("Home", Icons.Filled.Home),
-        BottomNavItem("Search", Icons.Filled.Search),
-        BottomNavItem("About", Icons.Filled.Info),
-        BottomNavItem("Contact", Icons.Filled.Email),
-    )
-
+private fun AppBottomBar(onNavigateToSearch: () -> Unit) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
     ) {
-        items.forEachIndexed { index, item ->
-            NavigationBarItem(
-                selected = index == selectedIndex,
-                onClick = { selectedIndex = index },
-                icon = {
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = item.label,
-                    )
-                },
-                label = {
-                    Text(
-                        text = item.label,
-                        style = MaterialTheme.typography.labelSmall,
-                    )
-                },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Orange500,
-                    selectedTextColor = Orange500,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    indicatorColor = Color.Transparent,
-                ),
-            )
-        }
+        NavigationBarItem(
+            selected = true,
+            onClick = {},
+            icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
+            label = { Text("Home", style = MaterialTheme.typography.labelSmall) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = Orange500,
+                selectedTextColor = Orange500,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                indicatorColor = Color.Transparent,
+            ),
+        )
+        NavigationBarItem(
+            selected = false,
+            onClick = onNavigateToSearch,
+            icon = { Icon(Icons.Filled.Search, contentDescription = "Search") },
+            label = { Text("Search", style = MaterialTheme.typography.labelSmall) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = Orange500,
+                selectedTextColor = Orange500,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                indicatorColor = Color.Transparent,
+            ),
+        )
+        NavigationBarItem(
+            selected = false,
+            onClick = {},
+            icon = { Icon(Icons.Filled.Info, contentDescription = "About") },
+            label = { Text("About", style = MaterialTheme.typography.labelSmall) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = Orange500,
+                selectedTextColor = Orange500,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                indicatorColor = Color.Transparent,
+            ),
+        )
+        NavigationBarItem(
+            selected = false,
+            onClick = {},
+            icon = { Icon(Icons.Filled.Email, contentDescription = "Contact") },
+            label = { Text("Contact", style = MaterialTheme.typography.labelSmall) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = Orange500,
+                selectedTextColor = Orange500,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                indicatorColor = Color.Transparent,
+            ),
+        )
     }
 }
-
-private data class BottomNavItem(val label: String, val icon: ImageVector)
 
 @Composable
 private fun LoadingContent(padding: PaddingValues) {
