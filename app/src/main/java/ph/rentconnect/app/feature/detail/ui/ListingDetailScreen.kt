@@ -2,6 +2,7 @@ package ph.rentconnect.app.feature.detail.ui
 
 import android.content.Intent
 import androidx.compose.foundation.background
+import ph.rentconnect.app.BuildConfig
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -317,7 +318,7 @@ private fun DetailContent(
                     IconButton(onClick = {
                         val shareIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
-                            putExtra(Intent.EXTRA_TEXT, "https://rentconnectph.com/listings/${listing.uuid}")
+                            putExtra(Intent.EXTRA_TEXT, "${BuildConfig.BASE_URL}/listings/${listing.uuid}")
                         }
                         context.startActivity(Intent.createChooser(shareIntent, "Share listing"))
                     }) {
