@@ -1,7 +1,6 @@
 package ph.rentconnect.app.feature.detail.ui
 
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bathtub
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.CropSquare
 import androidx.compose.material.icons.filled.DarkMode
@@ -39,6 +39,13 @@ import androidx.compose.material.icons.filled.KingBed
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -48,6 +55,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -63,7 +71,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -88,6 +100,25 @@ fun ListingDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val inquiryState by viewModel.inquiryState.collectAsStateWithLifecycle()
+
+    when (val inquiry = inquiryState) {
+        is InquiryDialogState.Visible -> {
+            InquiryFormDialog(
+                state = inquiry,
+                onNameChange = viewModel::updateInquiryName,
+                onPhoneChange = viewModel::updateInquiryPhone,
+                onFieldFocus = viewModel::onFieldFocus,
+                onFieldBlur = viewModel::onFieldBlur,
+                onSubmit = viewModel::submitInquiry,
+                onDismiss = viewModel::closeInquiryDialog,
+            )
+        }
+        is InquiryDialogState.Success -> {
+            InquirySuccessDialog(onDismiss = viewModel::closeInquiryDialog)
+        }
+        is InquiryDialogState.Hidden -> {}
+    }
 
     Scaffold(
         topBar = { DetailTopBar(themeMode = themeMode, onThemeToggle = onThemeToggle, onBack = onBack) },
@@ -103,7 +134,11 @@ fun ListingDetailScreen(
                 is ListingDetailUiState.Loading -> LoadingContent(PaddingValues())
                 is ListingDetailUiState.NotFound -> NotFoundContent(PaddingValues(), onBack)
                 is ListingDetailUiState.Error -> ErrorContent(PaddingValues(), onRetry = viewModel::retry)
-                is ListingDetailUiState.Success -> DetailContent(PaddingValues(), state.listing)
+                is ListingDetailUiState.Success -> DetailContent(
+                    PaddingValues(),
+                    state.listing,
+                    onInquireClick = viewModel::openInquiryDialog,
+                )
             }
         }
     }
@@ -226,7 +261,11 @@ private fun ErrorContent(padding: PaddingValues, onRetry: () -> Unit) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun DetailContent(padding: PaddingValues, listing: ListingDetail) {
+private fun DetailContent(
+    padding: PaddingValues,
+    listing: ListingDetail,
+    onInquireClick: () -> Unit = {},
+) {
     val context = LocalContext.current
     var mapTouching by remember { mutableStateOf(false) }
 
@@ -490,10 +529,7 @@ private fun DetailContent(padding: PaddingValues, listing: ListingDetail) {
                 .padding(horizontal = 16.dp, vertical = 12.dp),
         ) {
             Button(
-                onClick = {
-                    val smsIntent = Intent(Intent.ACTION_VIEW, Uri.parse("sms:"))
-                    context.startActivity(smsIntent)
-                },
+                onClick = onInquireClick,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Orange500),
@@ -578,6 +614,182 @@ private fun SpecItem(icon: ImageVector, text: String) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+}
+
+@Composable
+private fun InquiryFormDialog(
+    state: InquiryDialogState.Visible,
+    onNameChange: (String) -> Unit,
+    onPhoneChange: (String) -> Unit,
+    onFieldFocus: (String) -> Unit,
+    onFieldBlur: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Dialog(onDismissRequest = { if (!state.isSubmitting) onDismiss() }) {
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            modifier = Modifier
+                .widthIn(min = 340.dp)
+                .fillMaxWidth()
+                .wrapContentHeight(),
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "Inquire about this listing",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    IconButton(
+                        onClick = onDismiss,
+                        enabled = !state.isSubmitting,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = "Close",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                // Name field
+                Text(
+                    text = "Name",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = state.name,
+                    onValueChange = onNameChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onFocusChanged {
+                            if (it.isFocused) onFieldFocus("name") else onFieldBlur("name")
+                        },
+                    enabled = !state.isSubmitting,
+                    isError = state.fieldErrors.containsKey("name"),
+                    singleLine = true,
+                    shape = RoundedCornerShape(8.dp),
+                )
+                state.fieldErrors["name"]?.firstOrNull()?.let { error ->
+                    Text(
+                        text = error,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                // Phone field
+                Text(
+                    text = "Phone",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = state.phone,
+                    onValueChange = onPhoneChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onFocusChanged {
+                            if (it.isFocused) onFieldFocus("phone") else onFieldBlur("phone")
+                        },
+                    enabled = !state.isSubmitting,
+                    isError = state.fieldErrors.containsKey("phone"),
+                    singleLine = true,
+                    placeholder = { Text("0917 123 4567") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    shape = RoundedCornerShape(8.dp),
+                )
+                state.fieldErrors["phone"]?.firstOrNull()?.let { error ->
+                    Text(
+                        text = error,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                Text(
+                    text = "Our team will give you a call shortly.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                // Submit error
+                state.submitError?.let { error ->
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = error,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+
+                if (state.isSubmitting) {
+                    Spacer(Modifier.height(8.dp))
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Orange500,
+                    )
+                }
+
+                Spacer(Modifier.height(20.dp))
+
+                Button(
+                    onClick = onSubmit,
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !state.isSubmitting,
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Orange500),
+                ) {
+                    Text(
+                        text = "Submit inquiry",
+                        modifier = Modifier.padding(vertical = 4.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InquirySuccessDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Inquiry sent!",
+                fontWeight = FontWeight.Bold,
+            )
+        },
+        text = {
+            Text("Our team will give you a call shortly.")
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("OK", color = Orange500)
+            }
+        },
+    )
 }
 
 private fun formatDate(isoDate: String): String =

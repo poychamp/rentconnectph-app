@@ -20,6 +20,8 @@ import ph.rentconnect.app.core.network.Result
 import ph.rentconnect.app.feature.detail.data.ListingAmenity
 import ph.rentconnect.app.feature.detail.data.ListingDetail
 import ph.rentconnect.app.feature.detail.data.ListingDetailRepository
+import ph.rentconnect.app.feature.detail.data.InquiryRepository
+import ph.rentconnect.app.feature.detail.data.InquiryResult
 import ph.rentconnect.app.feature.detail.data.ListingImage
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -117,6 +119,172 @@ class ListingDetailViewModelTest {
             val success = awaitItem()
             assertTrue(success is ListingDetailUiState.Success)
             assertEquals(uuid, (success as ListingDetailUiState.Success).listing.uuid)
+        }
+    }
+
+    // --- Inquiry dialog tests ---
+
+    @Test
+    fun `it opens inquiry dialog`() = runTest {
+        coEvery { repository.getListing(any()) } returns Result.Success(listingDetail())
+        val inquiryRepository = mockk<InquiryRepository>()
+
+        val viewModel = ListingDetailViewModel("abc-123", repository, inquiryRepository)
+
+        viewModel.inquiryState.test {
+            assertEquals(InquiryDialogState.Hidden, awaitItem())
+            viewModel.openInquiryDialog()
+            val state = awaitItem()
+            assertTrue(state is InquiryDialogState.Visible)
+            assertEquals("", (state as InquiryDialogState.Visible).name)
+            assertEquals("", state.phone)
+        }
+    }
+
+    @Test
+    fun `it closes inquiry dialog`() = runTest {
+        coEvery { repository.getListing(any()) } returns Result.Success(listingDetail())
+        val inquiryRepository = mockk<InquiryRepository>()
+
+        val viewModel = ListingDetailViewModel("abc-123", repository, inquiryRepository)
+
+        viewModel.inquiryState.test {
+            assertEquals(InquiryDialogState.Hidden, awaitItem())
+            viewModel.openInquiryDialog()
+            assertTrue(awaitItem() is InquiryDialogState.Visible)
+            viewModel.closeInquiryDialog()
+            assertEquals(InquiryDialogState.Hidden, awaitItem())
+        }
+    }
+
+    @Test
+    fun `it submits inquiry and shows success`() = runTest {
+        coEvery { repository.getListing(any()) } returns Result.Success(listingDetail())
+        val inquiryRepository = mockk<InquiryRepository>()
+        coEvery { inquiryRepository.submitInquiry(any(), any(), any()) } returns InquiryResult.Success
+
+        val viewModel = ListingDetailViewModel("abc-123", repository, inquiryRepository)
+
+        viewModel.inquiryState.test {
+            skipItems(1) // Hidden
+            viewModel.openInquiryDialog()
+            skipItems(1) // Visible
+            viewModel.updateInquiryName("Maria Cruz")
+            skipItems(1)
+            viewModel.updateInquiryPhone("09171234567")
+            skipItems(1)
+            viewModel.submitInquiry()
+            // Submitting state
+            val submitting = awaitItem()
+            assertTrue(submitting is InquiryDialogState.Visible)
+            assertTrue((submitting as InquiryDialogState.Visible).isSubmitting)
+            // Success state
+            val success = awaitItem()
+            assertTrue(success is InquiryDialogState.Success)
+        }
+    }
+
+    @Test
+    fun `it shows validation errors from server on 422`() = runTest {
+        coEvery { repository.getListing(any()) } returns Result.Success(listingDetail())
+        val inquiryRepository = mockk<InquiryRepository>()
+        val errors = mapOf("name" to listOf("Name is required."), "phone" to listOf("Invalid PH mobile number."))
+        coEvery { inquiryRepository.submitInquiry(any(), any(), any()) } returns InquiryResult.ValidationError(errors)
+
+        val viewModel = ListingDetailViewModel("abc-123", repository, inquiryRepository)
+
+        viewModel.inquiryState.test {
+            skipItems(1) // Hidden
+            viewModel.openInquiryDialog()
+            skipItems(1) // Visible
+            viewModel.updateInquiryName("Maria Cruz")
+            skipItems(1)
+            viewModel.updateInquiryPhone("09171234567")
+            skipItems(1)
+            viewModel.submitInquiry()
+            skipItems(1) // Submitting
+            val state = awaitItem()
+            assertTrue(state is InquiryDialogState.Visible)
+            val visible = state as InquiryDialogState.Visible
+            assertEquals(listOf("Name is required."), visible.fieldErrors["name"])
+            assertEquals(listOf("Invalid PH mobile number."), visible.fieldErrors["phone"])
+            assertTrue(!visible.isSubmitting)
+        }
+    }
+
+    @Test
+    fun `it shows throttle error on 429`() = runTest {
+        coEvery { repository.getListing(any()) } returns Result.Success(listingDetail())
+        val inquiryRepository = mockk<InquiryRepository>()
+        coEvery { inquiryRepository.submitInquiry(any(), any(), any()) } returns InquiryResult.Throttled
+
+        val viewModel = ListingDetailViewModel("abc-123", repository, inquiryRepository)
+
+        viewModel.inquiryState.test {
+            skipItems(1) // Hidden
+            viewModel.openInquiryDialog()
+            skipItems(1) // Visible
+            viewModel.updateInquiryName("Maria Cruz")
+            skipItems(1)
+            viewModel.updateInquiryPhone("09171234567")
+            skipItems(1)
+            viewModel.submitInquiry()
+            skipItems(1) // Submitting
+            val state = awaitItem()
+            assertTrue(state is InquiryDialogState.Visible)
+            val visible = state as InquiryDialogState.Visible
+            assertEquals("Too many inquiries. Please try again later.", visible.submitError)
+            assertTrue(!visible.isSubmitting)
+        }
+    }
+
+    @Test
+    fun `it shows network error on submit failure`() = runTest {
+        coEvery { repository.getListing(any()) } returns Result.Success(listingDetail())
+        val inquiryRepository = mockk<InquiryRepository>()
+        coEvery { inquiryRepository.submitInquiry(any(), any(), any()) } returns InquiryResult.NetworkError
+
+        val viewModel = ListingDetailViewModel("abc-123", repository, inquiryRepository)
+
+        viewModel.inquiryState.test {
+            skipItems(1) // Hidden
+            viewModel.openInquiryDialog()
+            skipItems(1) // Visible
+            viewModel.updateInquiryName("Maria Cruz")
+            skipItems(1)
+            viewModel.updateInquiryPhone("09171234567")
+            skipItems(1)
+            viewModel.submitInquiry()
+            skipItems(1) // Submitting
+            val state = awaitItem()
+            assertTrue(state is InquiryDialogState.Visible)
+            val visible = state as InquiryDialogState.Visible
+            assertEquals("Connection error. Please check your internet and try again.", visible.submitError)
+            assertTrue(!visible.isSubmitting)
+        }
+    }
+
+    @Test
+    fun `it dismisses success state back to hidden`() = runTest {
+        coEvery { repository.getListing(any()) } returns Result.Success(listingDetail())
+        val inquiryRepository = mockk<InquiryRepository>()
+        coEvery { inquiryRepository.submitInquiry(any(), any(), any()) } returns InquiryResult.Success
+
+        val viewModel = ListingDetailViewModel("abc-123", repository, inquiryRepository)
+
+        viewModel.inquiryState.test {
+            skipItems(1) // Hidden
+            viewModel.openInquiryDialog()
+            skipItems(1) // Visible
+            viewModel.updateInquiryName("Maria Cruz")
+            skipItems(1)
+            viewModel.updateInquiryPhone("09171234567")
+            skipItems(1)
+            viewModel.submitInquiry()
+            skipItems(1) // Submitting
+            assertTrue(awaitItem() is InquiryDialogState.Success)
+            viewModel.closeInquiryDialog()
+            assertEquals(InquiryDialogState.Hidden, awaitItem())
         }
     }
 

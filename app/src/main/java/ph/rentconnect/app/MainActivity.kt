@@ -19,6 +19,8 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import ph.rentconnect.app.core.persistence.ThemeMode
 import ph.rentconnect.app.core.persistence.ThemePreferences
+import ph.rentconnect.app.feature.detail.data.InquiryApi
+import ph.rentconnect.app.feature.detail.data.InquiryRepository
 import ph.rentconnect.app.feature.detail.data.ListingDetailApi
 import ph.rentconnect.app.feature.detail.data.ListingDetailRepository
 import ph.rentconnect.app.feature.detail.ui.ListingDetailScreen
@@ -67,7 +69,9 @@ class MainActivity : ComponentActivity() {
             HomeViewModelFactory(HomeRepository(retrofit.create(HomeApi::class.java))),
         )[HomeViewModel::class.java]
 
+        val json = Json { ignoreUnknownKeys = true }
         val detailRepository = ListingDetailRepository(retrofit.create(ListingDetailApi::class.java))
+        val inquiryRepository = InquiryRepository(retrofit.create(InquiryApi::class.java), json)
         val searchRepository = SearchRepository(retrofit.create(SearchApi::class.java))
 
         setContent {
@@ -145,7 +149,7 @@ class MainActivity : ComponentActivity() {
                         val route = backStackEntry.toRoute<DetailRoute>()
                         val detailViewModel = ViewModelProvider(
                             backStackEntry,
-                            ListingDetailViewModelFactory(route.uuid, detailRepository),
+                            ListingDetailViewModelFactory(route.uuid, detailRepository, inquiryRepository),
                         )[ListingDetailViewModel::class.java]
 
                         ListingDetailScreen(
