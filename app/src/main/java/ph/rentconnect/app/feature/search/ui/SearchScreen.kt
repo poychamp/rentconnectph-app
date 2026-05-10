@@ -62,12 +62,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import ph.rentconnect.app.R
 import ph.rentconnect.app.core.persistence.ThemeMode
-import ph.rentconnect.app.feature.home.data.CatalogItem
 import ph.rentconnect.app.feature.home.ui.components.AreaFilter
 import ph.rentconnect.app.feature.home.ui.components.BudgetFilter
 import ph.rentconnect.app.feature.home.ui.components.ListingCard
