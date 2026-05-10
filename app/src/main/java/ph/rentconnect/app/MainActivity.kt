@@ -8,12 +8,22 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import ph.rentconnect.app.core.persistence.ThemeMode
 import ph.rentconnect.app.core.persistence.ThemePreferences
+import ph.rentconnect.app.feature.detail.data.ListingDetailApi
+import ph.rentconnect.app.feature.detail.data.ListingDetailRepository
+import ph.rentconnect.app.feature.detail.ui.ListingDetailScreen
+import ph.rentconnect.app.feature.detail.ui.ListingDetailViewModel
+import ph.rentconnect.app.feature.detail.ui.ListingDetailViewModelFactory
 import ph.rentconnect.app.feature.home.data.HomeApi
 import ph.rentconnect.app.feature.home.data.HomeRepository
 import ph.rentconnect.app.feature.home.ui.HomeScreen
@@ -23,18 +33,27 @@ import ph.rentconnect.app.ui.theme.RentConnectAppTheme
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
+@Serializable
+data object HomeRoute
+
+@Serializable
+data class DetailRoute(val uuid: String)
+
 class MainActivity : ComponentActivity() {
 
     private val themePreferences by lazy { ThemePreferences(applicationContext) }
+    private val retrofit by lazy { provideRetrofit() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val viewModel = ViewModelProvider(
+        val homeViewModel = ViewModelProvider(
             this,
-            HomeViewModelFactory(provideHomeRepository()),
+            HomeViewModelFactory(HomeRepository(retrofit.create(HomeApi::class.java))),
         )[HomeViewModel::class.java]
+
+        val detailRepository = ListingDetailRepository(retrofit.create(ListingDetailApi::class.java))
 
         setContent {
             val themeMode by themePreferences.themeMode
@@ -47,16 +66,39 @@ class MainActivity : ComponentActivity() {
             }
 
             RentConnectAppTheme(darkTheme = darkTheme) {
-                HomeScreen(
-                    viewModel = viewModel,
-                    themeMode = themeMode,
-                    onThemeToggle = themePreferences::setThemeMode,
-                )
+                val navController = rememberNavController()
+
+                NavHost(navController = navController, startDestination = HomeRoute) {
+                    composable<HomeRoute> {
+                        HomeScreen(
+                            viewModel = homeViewModel,
+                            themeMode = themeMode,
+                            onThemeToggle = themePreferences::setThemeMode,
+                            onListingClick = { uuid ->
+                                navController.navigate(DetailRoute(uuid))
+                            },
+                        )
+                    }
+                    composable<DetailRoute> { backStackEntry ->
+                        val route = backStackEntry.toRoute<DetailRoute>()
+                        val detailViewModel = ViewModelProvider(
+                            backStackEntry,
+                            ListingDetailViewModelFactory(route.uuid, detailRepository),
+                        )[ListingDetailViewModel::class.java]
+
+                        ListingDetailScreen(
+                            viewModel = detailViewModel,
+                            themeMode = themeMode,
+                            onThemeToggle = themePreferences::setThemeMode,
+                            onBack = { navController.popBackStack() },
+                        )
+                    }
+                }
             }
         }
     }
 
-    private fun provideHomeRepository(): HomeRepository {
+    private fun provideRetrofit(): Retrofit {
         val json = Json { ignoreUnknownKeys = true }
 
         val client = OkHttpClient.Builder()
@@ -73,13 +115,10 @@ class MainActivity : ComponentActivity() {
             )
             .build()
 
-        val retrofit = Retrofit.Builder()
+        return Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
             .client(client)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
-
-        val api = retrofit.create(HomeApi::class.java)
-        return HomeRepository(api)
     }
 }

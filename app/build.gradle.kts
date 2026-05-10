@@ -20,6 +20,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "MAPBOX_PUBLIC_TOKEN", "\"${providers.gradleProperty("MAPBOX_PUBLIC_TOKEN").get()}\"")
     }
 
     buildTypes {
@@ -54,6 +55,9 @@ android {
             buildConfigField("String", "BASE_URL", "\"https://rentconnectph.com\"")
         }
     }
+    packaging {
+        jniLibs { useLegacyPackaging = true }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -79,6 +83,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.coil.compose)
     implementation(libs.datastore.preferences)
+    implementation(libs.mapbox.maps)
+    implementation(libs.mapbox.maps.compose)
+    implementation(libs.navigation.compose)
     implementation(libs.compose.material.icons.extended)
     implementation(libs.compose.ui.text.google.fonts)
     implementation(libs.kotlinx.coroutines.core)

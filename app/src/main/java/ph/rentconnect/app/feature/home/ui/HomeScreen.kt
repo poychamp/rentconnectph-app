@@ -69,6 +69,7 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     themeMode: ThemeMode,
     onThemeToggle: suspend (ThemeMode) -> Unit,
+    onListingClick: (String) -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -79,7 +80,7 @@ fun HomeScreen(
         when (val state = uiState) {
             is HomeUiState.Loading -> LoadingContent(padding)
             is HomeUiState.Error -> ErrorContent(padding, onRetry = viewModel::refresh)
-            is HomeUiState.Success -> SuccessContent(padding, state)
+            is HomeUiState.Success -> SuccessContent(padding, state, onListingClick)
         }
     }
 }
@@ -221,7 +222,7 @@ private fun ErrorContent(padding: PaddingValues, onRetry: () -> Unit) {
 }
 
 @Composable
-private fun SuccessContent(padding: PaddingValues, state: HomeUiState.Success) {
+private fun SuccessContent(padding: PaddingValues, state: HomeUiState.Success, onListingClick: (String) -> Unit) {
     var selectedType by remember { mutableStateOf<String?>(null) }
 
     LazyColumn(
@@ -248,7 +249,7 @@ private fun SuccessContent(padding: PaddingValues, state: HomeUiState.Success) {
             )
         }
         items(state.featured, key = { it.uuid }) { listing ->
-            ListingCard(listing)
+            ListingCard(listing, onClick = { onListingClick(listing.uuid) })
         }
 
         // Divider
@@ -268,7 +269,7 @@ private fun SuccessContent(padding: PaddingValues, state: HomeUiState.Success) {
             )
         }
         items(state.recently, key = { it.uuid }) { listing ->
-            ListingCard(listing)
+            ListingCard(listing, onClick = { onListingClick(listing.uuid) })
         }
 
         // Bottom spacer
