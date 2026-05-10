@@ -156,13 +156,11 @@ private fun DropdownChip(
                 color = if (selected != null) Color.Black else Color.Gray,
                 modifier = Modifier.weight(1f),
             )
-            if (items.isNotEmpty()) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowDropDown,
-                    contentDescription = null,
-                    tint = Color.Gray,
-                )
-            }
+            Icon(
+                imageVector = Icons.Filled.ArrowDropDown,
+                contentDescription = null,
+                tint = Color.Gray,
+            )
         }
 
         DropdownMenu(
