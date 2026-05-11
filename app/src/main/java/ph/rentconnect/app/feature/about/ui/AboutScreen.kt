@@ -126,12 +126,18 @@ private fun AboutTopBar(
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface)
             .windowInsetsPadding(WindowInsets.statusBars)
-            .padding(horizontal = 4.dp, vertical = 4.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(modifier = Modifier.size(48.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                painter = painterResource(R.drawable.ic_logo),
+                contentDescription = "RentConnectPH",
+                modifier = Modifier.size(36.dp),
+                tint = Color.Unspecified,
+            )
+            Spacer(Modifier.width(8.dp))
             Text(
                 text = "RentConnect",
                 style = MaterialTheme.typography.titleMedium,

@@ -69,6 +69,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import ph.rentconnect.app.R
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -175,6 +177,13 @@ private fun DetailTopBar(
             )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                painter = painterResource(R.drawable.ic_logo),
+                contentDescription = "RentConnectPH",
+                modifier = Modifier.size(36.dp),
+                tint = Color.Unspecified,
+            )
+            Spacer(Modifier.width(8.dp))
             Text(
                 text = "RentConnect",
                 style = MaterialTheme.typography.titleMedium,

@@ -3,6 +3,7 @@ package ph.rentconnect.app.feature.detail.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,8 +40,11 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import ph.rentconnect.app.R
 import ph.rentconnect.app.core.persistence.ThemeMode
 import ph.rentconnect.app.ui.theme.Orange500
 
@@ -71,6 +77,13 @@ fun InquirySuccessScreen(
                     )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_logo),
+                        contentDescription = "RentConnectPH",
+                        modifier = Modifier.size(36.dp),
+                        tint = Color.Unspecified,
+                    )
+                    Spacer(Modifier.width(8.dp))
                     Text(
                         text = "RentConnect",
                         style = MaterialTheme.typography.titleMedium,
@@ -105,10 +118,21 @@ fun InquirySuccessScreen(
             }
         },
     ) { padding ->
-        Column(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(padding),
+        ) {
+            val containerModifier = if (maxWidth >= 600.dp) {
+                Modifier
+                    .widthIn(max = 600.dp)
+                    .align(Alignment.Center)
+            } else {
+                Modifier.fillMaxSize()
+            }
+
+        Column(
+            modifier = containerModifier
                 .padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -171,5 +195,6 @@ fun InquirySuccessScreen(
                 )
             }
         }
+        } // BoxWithConstraints
     }
 }

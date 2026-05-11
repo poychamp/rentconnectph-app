@@ -35,7 +35,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.width
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import ph.rentconnect.app.R
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -73,6 +76,13 @@ fun ContactSuccessScreen(
                     )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_logo),
+                        contentDescription = "RentConnectPH",
+                        modifier = Modifier.size(36.dp),
+                        tint = Color.Unspecified,
+                    )
+                    Spacer(Modifier.width(8.dp))
                     Text(
                         text = "RentConnect",
                         style = MaterialTheme.typography.titleMedium,
