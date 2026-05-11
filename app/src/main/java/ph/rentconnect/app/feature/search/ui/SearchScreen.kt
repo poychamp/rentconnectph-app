@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.layout.statusBars
@@ -266,7 +268,17 @@ private fun SearchContent(
     val scope = rememberCoroutineScope()
     val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 2 } }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    val isTablet = maxWidth >= 600.dp
+    val containerModifier = if (isTablet) {
+        Modifier
+            .widthIn(max = 900.dp)
+            .align(Alignment.TopCenter)
+    } else {
+        Modifier
+    }
+
+    Box(modifier = containerModifier.fillMaxSize()) {
     LazyColumn(
         state = listState,
         modifier = Modifier.fillMaxSize(),
@@ -506,8 +518,23 @@ private fun SearchContent(
         }
 
         // Listing cards
-        items(uiState.items, key = { "search_${it.uuid}" }) { listing ->
-            ListingCard(listing, onClick = { onListingClick(listing.uuid) })
+        if (isTablet) {
+            items(uiState.items.chunked(2), key = { "search_row_${it.first().uuid}" }) { row ->
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    row.forEach { listing ->
+                        ListingCard(
+                            listing,
+                            onClick = { onListingClick(listing.uuid) },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                    if (row.size == 1) Spacer(Modifier.weight(1f))
+                }
+            }
+        } else {
+            items(uiState.items, key = { "search_${it.uuid}" }) { listing ->
+                ListingCard(listing, onClick = { onListingClick(listing.uuid) })
+            }
         }
 
         // Load more / end states
@@ -597,6 +624,7 @@ private fun SearchContent(
         }
     }
     } // Box
+    } // BoxWithConstraints
 }
 
 
