@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -366,68 +368,109 @@ private fun SuccessContent(
     onClearTypes: () -> Unit,
     onSubmit: () -> Unit,
 ) {
-    LazyColumn(
-        contentPadding = padding,
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        // Hero
-        item {
-            HeroSection(
-                barangays = state.catalogs.barangays,
-                searchQuery = searchQuery,
-                selectedArea = selectedArea,
-                budgetMin = budgetMin,
-                budgetMax = budgetMax,
-                onSearchQueryChange = onSearchQueryChange,
-                onAreaChange = onAreaChange,
-                onBudgetChange = onBudgetChange,
-                onSubmit = onSubmit,
-            )
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val isTablet = maxWidth >= 600.dp
+        val containerModifier = if (isTablet) {
+            Modifier
+                .widthIn(max = 900.dp)
+                .align(Alignment.TopCenter)
+        } else {
+            Modifier
         }
 
-        // Property type chips
-        item {
-            PropertyTypeChips(
-                types = state.catalogs.listingTypes,
-                selectedTypes = selectedTypes,
-                onTypeToggle = onTypeToggle,
-                onClearTypes = onClearTypes,
-            )
-        }
+        LazyColumn(
+            contentPadding = padding,
+            modifier = containerModifier.fillMaxSize(),
+        ) {
+            // Hero
+            item {
+                HeroSection(
+                    barangays = state.catalogs.barangays,
+                    searchQuery = searchQuery,
+                    selectedArea = selectedArea,
+                    budgetMin = budgetMin,
+                    budgetMax = budgetMax,
+                    onSearchQueryChange = onSearchQueryChange,
+                    onAreaChange = onAreaChange,
+                    onBudgetChange = onBudgetChange,
+                    onSubmit = onSubmit,
+                )
+            }
 
-        // Featured Listings
-        item {
-            SectionHeader(
-                title = "Featured Listings",
-                subtitle = "Hand-picked by RentConnectPH",
-            )
-        }
-        items(state.featured, key = { "featured_${it.uuid}" }) { listing ->
-            ListingCard(listing, onClick = { onListingClick(listing.uuid) })
-        }
+            // Property type chips
+            item {
+                PropertyTypeChips(
+                    types = state.catalogs.listingTypes,
+                    selectedTypes = selectedTypes,
+                    onTypeToggle = onTypeToggle,
+                    onClearTypes = onClearTypes,
+                )
+            }
 
-        // Divider
-        item {
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
-                color = MaterialTheme.colorScheme.outlineVariant,
-            )
-        }
+            // Featured Listings
+            item {
+                SectionHeader(
+                    title = "Featured Listings",
+                    subtitle = "Hand-picked by RentConnectPH",
+                )
+            }
+            if (isTablet) {
+                items(state.featured.chunked(2), key = { "featured_row_${it.first().uuid}" }) { row ->
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        row.forEach { listing ->
+                            ListingCard(
+                                listing,
+                                onClick = { onListingClick(listing.uuid) },
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                        if (row.size == 1) Spacer(Modifier.weight(1f))
+                    }
+                }
+            } else {
+                items(state.featured, key = { "featured_${it.uuid}" }) { listing ->
+                    ListingCard(listing, onClick = { onListingClick(listing.uuid) })
+                }
+            }
 
-        // Recently Verified
-        item {
-            SectionHeader(
-                title = "Recently Verified",
-                subtitle = "Fresh listings, all ground-checked",
-                actionLabel = "View all →",
-            )
-        }
-        items(state.recently, key = { "recently_${it.uuid}" }) { listing ->
-            ListingCard(listing, onClick = { onListingClick(listing.uuid) })
-        }
+            // Divider
+            item {
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                )
+            }
 
-        // Bottom spacer
-        item { Spacer(Modifier.height(16.dp)) }
+            // Recently Verified
+            item {
+                SectionHeader(
+                    title = "Recently Verified",
+                    subtitle = "Fresh listings, all ground-checked",
+                    actionLabel = "View all →",
+                )
+            }
+            if (isTablet) {
+                items(state.recently.chunked(2), key = { "recently_row_${it.first().uuid}" }) { row ->
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        row.forEach { listing ->
+                            ListingCard(
+                                listing,
+                                onClick = { onListingClick(listing.uuid) },
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                        if (row.size == 1) Spacer(Modifier.weight(1f))
+                    }
+                }
+            } else {
+                items(state.recently, key = { "recently_${it.uuid}" }) { listing ->
+                    ListingCard(listing, onClick = { onListingClick(listing.uuid) })
+                }
+            }
+
+            // Bottom spacer
+            item { Spacer(Modifier.height(16.dp)) }
+        }
     }
 }
 
