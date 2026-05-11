@@ -3,6 +3,7 @@ package ph.rentconnect.app.feature.contact.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -105,10 +107,21 @@ fun ContactSuccessScreen(
             }
         },
     ) { padding ->
-        Column(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(padding),
+        ) {
+            val containerModifier = if (maxWidth >= 600.dp) {
+                Modifier
+                    .widthIn(max = 600.dp)
+                    .align(Alignment.Center)
+            } else {
+                Modifier.fillMaxSize()
+            }
+
+        Column(
+            modifier = containerModifier
                 .padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -181,5 +194,6 @@ fun ContactSuccessScreen(
                 )
             }
         }
+        } // BoxWithConstraints
     }
 }
