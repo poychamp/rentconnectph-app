@@ -3,6 +3,7 @@ package ph.rentconnect.app.feature.contact.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -88,20 +90,34 @@ fun ContactScreen(
             )
         },
     ) { padding ->
-        when (val state = uiState) {
-            is ContactUiState.Form -> ContactFormContent(
-                state = state,
-                modifier = Modifier.padding(padding),
-                onNameChange = viewModel::updateName,
-                onEmailChange = viewModel::updateEmail,
-                onMessageChange = viewModel::updateMessage,
-                onFieldFocus = viewModel::onFieldFocus,
-                onFieldBlur = viewModel::onFieldBlur,
-                onSubmit = viewModel::submitContact,
-            )
-            is ContactUiState.Success -> {
-                LaunchedEffect(Unit) {
-                    onContactSuccess()
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+        ) {
+            val containerModifier = if (maxWidth >= 600.dp) {
+                Modifier
+                    .widthIn(max = 600.dp)
+                    .align(Alignment.TopCenter)
+            } else {
+                Modifier
+            }
+
+            when (val state = uiState) {
+                is ContactUiState.Form -> ContactFormContent(
+                    state = state,
+                    modifier = containerModifier,
+                    onNameChange = viewModel::updateName,
+                    onEmailChange = viewModel::updateEmail,
+                    onMessageChange = viewModel::updateMessage,
+                    onFieldFocus = viewModel::onFieldFocus,
+                    onFieldBlur = viewModel::onFieldBlur,
+                    onSubmit = viewModel::submitContact,
+                )
+                is ContactUiState.Success -> {
+                    LaunchedEffect(Unit) {
+                        onContactSuccess()
+                    }
                 }
             }
         }
