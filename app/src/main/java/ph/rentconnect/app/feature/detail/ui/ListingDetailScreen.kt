@@ -6,6 +6,7 @@ import ph.rentconnect.app.BuildConfig
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -76,6 +77,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -273,7 +275,17 @@ private fun DetailContent(
     val context = LocalContext.current
     var mapTouching by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    val isTablet = maxWidth >= 600.dp
+    val containerModifier = if (isTablet) {
+        Modifier
+            .widthIn(max = 900.dp)
+            .align(Alignment.TopCenter)
+    } else {
+        Modifier
+    }
+
+    Box(modifier = containerModifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -282,7 +294,7 @@ private fun DetailContent(
         ) {
             // Photo gallery
             if (listing.images.isNotEmpty()) {
-                PhotoGallery(listing.images.map { it.url })
+                PhotoGallery(listing.images.map { it.url }, galleryHeight = if (isTablet) 400.dp else 250.dp)
             }
 
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -547,10 +559,11 @@ private fun DetailContent(
             }
         }
     }
+    } // BoxWithConstraints
 }
 
 @Composable
-private fun PhotoGallery(imageUrls: List<String>) {
+private fun PhotoGallery(imageUrls: List<String>, galleryHeight: Dp = 250.dp) {
     val pagerState = rememberPagerState(pageCount = { imageUrls.size })
 
     Column {
@@ -558,7 +571,7 @@ private fun PhotoGallery(imageUrls: List<String>) {
             state = pagerState,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(250.dp),
+                .height(galleryHeight),
         ) { page ->
             AsyncImage(
                 model = imageUrls[page],
