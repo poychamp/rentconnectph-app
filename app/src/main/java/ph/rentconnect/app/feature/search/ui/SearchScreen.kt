@@ -1,5 +1,6 @@
 package ph.rentconnect.app.feature.search.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -54,6 +55,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -580,6 +582,11 @@ private fun SearchContent(
                     )
                 }
                 !uiState.isLoading && uiState.items.isEmpty() -> {
+                    val hasFilters = uiState.searchQuery.isNotBlank() ||
+                        uiState.selectedArea != null ||
+                        uiState.selectedTypes.isNotEmpty() ||
+                        uiState.budgetMin != null ||
+                        uiState.budgetMax != null
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -598,6 +605,20 @@ private fun SearchContent(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
+                            if (hasFilters) {
+                                Spacer(Modifier.height(16.dp))
+                                OutlinedButton(
+                                    onClick = onClearFilters,
+                                    shape = RoundedCornerShape(20.dp),
+                                    border = BorderStroke(1.dp, Orange500),
+                                ) {
+                                    Text(
+                                        text = "Clear filters",
+                                        color = Orange500,
+                                        fontWeight = FontWeight.Medium,
+                                    )
+                                }
+                            }
                         }
                     }
                 }
