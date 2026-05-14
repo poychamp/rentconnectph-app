@@ -319,6 +319,7 @@ class MainActivity : ComponentActivity() {
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder()
                     .addHeader("Accept", "application/json")
+                    .addHeader("Content-Type", "application/json")
                     .build()
                 chain.proceed(request)
             }
