@@ -361,7 +361,7 @@ private fun SearchContent(
                             Text(
                                 text = "keywords, amenities (e.g. wifi), 1 bed, 2 baths, 30sqm",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = Color.Gray,
+                                color = if (isDarkTheme) MaterialTheme.colorScheme.onSurfaceVariant else Color.Gray,
                             )
                         },
                         trailingIcon = {
@@ -373,10 +373,10 @@ private fun SearchContent(
                         },
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedContainerColor = Color.White,
-                            focusedContainerColor = Color.White,
-                            unfocusedBorderColor = Color.Transparent,
-                            focusedBorderColor = Color.Transparent,
+                            unfocusedContainerColor = if (isDarkTheme) MaterialTheme.colorScheme.surface else Color.White,
+                            focusedContainerColor = if (isDarkTheme) MaterialTheme.colorScheme.surface else Color.White,
+                            unfocusedBorderColor = if (isDarkTheme) MaterialTheme.colorScheme.outline else Color.Transparent,
+                            focusedBorderColor = if (isDarkTheme) MaterialTheme.colorScheme.outline else Color.Transparent,
                         ),
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
@@ -399,12 +399,14 @@ private fun SearchContent(
                             budgetMax = uiState.budgetMax,
                             onBudgetChange = onBudgetChange,
                             modifier = Modifier.weight(1f),
+                            isDarkTheme = isDarkTheme,
                         )
                         AreaFilter(
                             areas = uiState.catalogs?.barangays ?: emptyList(),
                             selectedArea = uiState.selectedArea,
                             onAreaChange = onAreaChange,
                             modifier = Modifier.weight(1f),
+                            isDarkTheme = isDarkTheme,
                         )
                     }
                 }

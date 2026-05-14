@@ -65,6 +65,7 @@ import ph.rentconnect.app.R
 import ph.rentconnect.app.core.persistence.ThemeMode
 import ph.rentconnect.app.feature.home.data.CatalogItem
 import ph.rentconnect.app.feature.home.ui.components.HeroSection
+import androidx.compose.foundation.isSystemInDarkTheme
 import ph.rentconnect.app.feature.home.ui.components.ListingCard
 import ph.rentconnect.app.ui.theme.Orange500
 
@@ -90,6 +91,11 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val isDarkTheme = when (themeMode) {
+        ThemeMode.Light -> false
+        ThemeMode.Dark -> true
+        ThemeMode.System -> isSystemInDarkTheme()
+    }
 
     // Local filter state for debounce
     var searchQuery by remember { mutableStateOf("") }
@@ -160,6 +166,7 @@ fun HomeScreen(
                 is HomeUiState.Success -> SuccessContent(
                     padding = PaddingValues(),
                     state = state,
+                    isDarkTheme = isDarkTheme,
                     onListingClick = onListingClick,
                     searchQuery = searchQuery,
                     selectedArea = selectedArea,
@@ -355,6 +362,7 @@ private fun ErrorContent(padding: PaddingValues, onRetry: () -> Unit) {
 private fun SuccessContent(
     padding: PaddingValues,
     state: HomeUiState.Success,
+    isDarkTheme: Boolean,
     onListingClick: (String) -> Unit,
     searchQuery: String,
     selectedArea: String?,
@@ -394,6 +402,7 @@ private fun SuccessContent(
                     onAreaChange = onAreaChange,
                     onBudgetChange = onBudgetChange,
                     onSubmit = onSubmit,
+                    isDarkTheme = isDarkTheme,
                 )
             }
 

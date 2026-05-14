@@ -52,6 +52,7 @@ fun BudgetFilter(
     budgetMax: Int?,
     onBudgetChange: (Int?, Int?) -> Unit,
     modifier: Modifier = Modifier,
+    isDarkTheme: Boolean = false,
 ) {
     var expanded by remember { mutableStateOf(false) }
     var minText by remember { mutableStateOf(budgetMin?.toString() ?: "") }
@@ -67,13 +68,13 @@ fun BudgetFilter(
             },
             onValueChange = {},
             readOnly = true,
-            placeholder = { Text("Budget", style = MaterialTheme.typography.bodySmall, color = Color.Gray) },
+            placeholder = { Text("Budget", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) },
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = Color.White,
-                focusedContainerColor = Color.White,
-                unfocusedBorderColor = Color.Transparent,
-                focusedBorderColor = Color.Transparent,
+                unfocusedContainerColor = if (isDarkTheme) MaterialTheme.colorScheme.surface else Color.White,
+                focusedContainerColor = if (isDarkTheme) MaterialTheme.colorScheme.surface else Color.White,
+                unfocusedBorderColor = if (isDarkTheme) MaterialTheme.colorScheme.outline else Color.Transparent,
+                focusedBorderColor = if (isDarkTheme) MaterialTheme.colorScheme.outline else Color.Transparent,
             ),
             modifier = Modifier
                 .fillMaxWidth()
@@ -229,6 +230,7 @@ fun AreaFilter(
     selectedArea: String?,
     onAreaChange: (String?) -> Unit,
     modifier: Modifier = Modifier,
+    isDarkTheme: Boolean = false,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -237,13 +239,13 @@ fun AreaFilter(
             value = areas.find { it.value == selectedArea }?.label ?: "",
             onValueChange = {},
             readOnly = true,
-            placeholder = { Text("CDO Areas", style = MaterialTheme.typography.bodySmall, color = Color.Gray) },
+            placeholder = { Text("CDO Areas", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) },
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = Color.White,
-                focusedContainerColor = Color.White,
-                unfocusedBorderColor = Color.Transparent,
-                focusedBorderColor = Color.Transparent,
+                unfocusedContainerColor = if (isDarkTheme) MaterialTheme.colorScheme.surface else Color.White,
+                focusedContainerColor = if (isDarkTheme) MaterialTheme.colorScheme.surface else Color.White,
+                unfocusedBorderColor = if (isDarkTheme) MaterialTheme.colorScheme.outline else Color.Transparent,
+                focusedBorderColor = if (isDarkTheme) MaterialTheme.colorScheme.outline else Color.Transparent,
             ),
             modifier = Modifier
                 .fillMaxWidth()

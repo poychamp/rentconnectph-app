@@ -45,6 +45,7 @@ fun HeroSection(
     onBudgetChange: (Int?, Int?) -> Unit,
     onSubmit: () -> Unit,
     modifier: Modifier = Modifier,
+    isDarkTheme: Boolean = false,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -102,7 +103,7 @@ fun HeroSection(
                     Text(
                         text = "keywords, amenities (e.g. wifi), 1 bed, 2 baths, 30sqm",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray,
+                        color = if (isDarkTheme) MaterialTheme.colorScheme.onSurfaceVariant else Color.Gray,
                     )
                 },
                 trailingIcon = {
@@ -114,10 +115,10 @@ fun HeroSection(
                 },
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.White,
-                    focusedContainerColor = Color.White,
-                    unfocusedBorderColor = Color.Transparent,
-                    focusedBorderColor = Color.Transparent,
+                    unfocusedContainerColor = if (isDarkTheme) MaterialTheme.colorScheme.surface else Color.White,
+                    focusedContainerColor = if (isDarkTheme) MaterialTheme.colorScheme.surface else Color.White,
+                    unfocusedBorderColor = if (isDarkTheme) MaterialTheme.colorScheme.outline else Color.Transparent,
+                    focusedBorderColor = if (isDarkTheme) MaterialTheme.colorScheme.outline else Color.Transparent,
                 ),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
@@ -139,12 +140,14 @@ fun HeroSection(
                     budgetMax = budgetMax,
                     onBudgetChange = onBudgetChange,
                     modifier = Modifier.weight(1f),
+                    isDarkTheme = isDarkTheme,
                 )
                 AreaFilter(
                     areas = barangays,
                     selectedArea = selectedArea,
                     onAreaChange = onAreaChange,
                     modifier = Modifier.weight(1f),
+                    isDarkTheme = isDarkTheme,
                 )
             }
         }
