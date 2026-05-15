@@ -17,7 +17,10 @@ import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import ph.rentconnect.app.core.network.MinVersionInterceptor
 import ph.rentconnect.app.core.persistence.ThemeMode
+import ph.rentconnect.app.core.util.isAppOutdated
+import ph.rentconnect.app.feature.forceupdate.ui.ForceUpdateScreen
 import ph.rentconnect.app.core.persistence.ThemePreferences
 import ph.rentconnect.app.feature.detail.data.InquiryApi
 import ph.rentconnect.app.feature.detail.data.InquiryRepository
@@ -78,6 +81,7 @@ data object ContactSuccessRoute
 class MainActivity : ComponentActivity() {
 
     private val themePreferences by lazy { ThemePreferences(applicationContext) }
+    private val minVersionInterceptor = MinVersionInterceptor()
     private val retrofit by lazy { provideRetrofit() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -106,6 +110,16 @@ class MainActivity : ComponentActivity() {
             }
 
             RentConnectAppTheme(darkTheme = darkTheme) {
+                val serverMinVersion by minVersionInterceptor.minVersion
+                    .collectAsStateWithLifecycle(null)
+                val forceUpdate = serverMinVersion != null &&
+                    isAppOutdated(BuildConfig.VERSION_NAME, serverMinVersion!!)
+
+                if (forceUpdate) {
+                    ForceUpdateScreen()
+                    return@RentConnectAppTheme
+                }
+
                 val navController = rememberNavController()
 
                 NavHost(navController = navController, startDestination = HomeRoute) {
@@ -323,6 +337,7 @@ class MainActivity : ComponentActivity() {
                     .build()
                 chain.proceed(request)
             }
+            .addInterceptor(minVersionInterceptor)
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
                     level = HttpLoggingInterceptor.Level.BODY
