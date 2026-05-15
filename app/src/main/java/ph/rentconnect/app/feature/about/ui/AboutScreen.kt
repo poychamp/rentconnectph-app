@@ -2,6 +2,7 @@ package ph.rentconnect.app.feature.about.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -58,9 +59,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.content.Intent
+import android.net.Uri
 import kotlinx.coroutines.launch
+import ph.rentconnect.app.BuildConfig
 import ph.rentconnect.app.R
 import ph.rentconnect.app.core.persistence.ThemeMode
 import ph.rentconnect.app.ui.theme.Orange500
@@ -109,6 +116,7 @@ fun AboutScreen(
                 MeetTheBrokerSection(isTablet = isTablet)
                 FeatureCardsSection(isTablet = isTablet)
                 CtaBannerSection(onBrowseListings = onBrowseListings, isTablet = isTablet)
+                AboutFooterSection()
             }
         }
     }
@@ -756,6 +764,54 @@ private fun CtaBannerSection(onBrowseListings: () -> Unit, isTablet: Boolean = f
                 Text("\u2192", color = Color.White)
             }
         }
+    }
+}
+
+@Composable
+private fun AboutFooterSection() {
+    val context = LocalContext.current
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "Privacy Policy",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textDecoration = TextDecoration.Underline,
+                modifier = Modifier.clickable {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("${BuildConfig.BASE_URL}/privacy")))
+                },
+            )
+            Text(
+                text = "  ·  ",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "Terms of Service",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textDecoration = TextDecoration.Underline,
+                modifier = Modifier.clickable {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("${BuildConfig.BASE_URL}/terms")))
+                },
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = "© 2026 RentConnectPH · Cagayan de Oro",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
