@@ -5,9 +5,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class HomeResponse(
-    val featured: List<ListingCard>,
-    val recently: List<ListingCard>,
-    val catalogs: Catalogs,
+    val featured: List<ListingCard>? = null,
+    val recently: List<ListingCard>? = null,
+    val catalogs: Catalogs? = null,
 )
 
 @Serializable
@@ -15,8 +15,8 @@ data class ListingCard(
     val id: Int,
     val uuid: String,
     val title: String,
-    val type: String,
-    @SerialName("type_label") val typeLabel: String,
+    val type: String? = null,
+    @SerialName("type_label") val typeLabel: String? = null,
     @SerialName("price_monthly") val priceMonthly: Int? = null,
     val beds: Int? = null,
     val baths: Int? = null,
@@ -24,18 +24,18 @@ data class ListingCard(
     val barangay: String? = null,
     @SerialName("barangay_label") val barangayLabel: String? = null,
     val image: String? = null,
-    @SerialName("image_count") val imageCount: Int = 0,
+    @SerialName("image_count") val imageCount: Int? = null,
     val section: String? = null,
 )
 
 @Serializable
 data class Catalogs(
-    @SerialName("listing_types") val listingTypes: List<CatalogItem>,
-    val barangays: List<CatalogItem>,
+    @SerialName("listing_types") val listingTypes: List<CatalogItem>? = null,
+    val barangays: List<CatalogItem>? = null,
 )
 
 @Serializable
 data class CatalogItem(
-    val value: String,
-    val label: String,
+    val value: String? = null,
+    val label: String? = null,
 )

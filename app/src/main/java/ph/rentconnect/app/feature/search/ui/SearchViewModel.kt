@@ -122,10 +122,10 @@ class SearchViewModel(
                 is Result.Success -> {
                     _uiState.update {
                         it.copy(
-                            items = it.items + result.data.data,
-                            currentPage = result.data.meta.currentPage,
-                            lastPage = result.data.meta.lastPage,
-                            total = result.data.meta.total,
+                            items = it.items + result.data.data.orEmpty(),
+                            currentPage = result.data.meta?.currentPage ?: 1,
+                            lastPage = result.data.meta?.lastPage ?: 1,
+                            total = result.data.meta?.total ?: 0,
                             isLoadingMore = false,
                             error = null,
                         )
@@ -183,10 +183,10 @@ class SearchViewModel(
             is Result.Success -> {
                 _uiState.update {
                     it.copy(
-                        items = result.data.data,
-                        currentPage = result.data.meta.currentPage,
-                        lastPage = result.data.meta.lastPage,
-                        total = result.data.meta.total,
+                        items = result.data.data.orEmpty(),
+                        currentPage = result.data.meta?.currentPage ?: 1,
+                        lastPage = result.data.meta?.lastPage ?: 1,
+                        total = result.data.meta?.total ?: 0,
                         catalogs = result.data.catalogs,
                         isLoading = false,
                         error = null,

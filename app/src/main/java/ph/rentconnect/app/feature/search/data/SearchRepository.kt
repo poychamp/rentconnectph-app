@@ -16,7 +16,14 @@ class SearchRepository(private val api: SearchApi) {
     ): Result<SearchResponse> = try {
         val response = api.search(query, area, type, budgetMin, budgetMax, page)
         when {
-            response.isSuccessful -> Result.Success(response.body()!!)
+            response.isSuccessful -> {
+                val body = response.body()
+                if (body != null) {
+                    Result.Success(body)
+                } else {
+                    Result.Failure(ApiError.Unknown(IllegalStateException("Empty body")))
+                }
+            }
             response.code() in 500..599 -> Result.Failure(ApiError.ServerError(response.code()))
             else -> Result.Failure(ApiError.Unknown(Exception("HTTP ${response.code()}")))
         }

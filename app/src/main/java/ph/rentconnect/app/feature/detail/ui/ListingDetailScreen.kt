@@ -302,8 +302,8 @@ private fun DetailContent(
                 .verticalScroll(rememberScrollState(), enabled = !mapTouching),
         ) {
             // Photo gallery
-            if (listing.images.isNotEmpty()) {
-                PhotoGallery(listing.images.map { it.url }, galleryHeight = if (isTablet) 400.dp else 250.dp)
+            if (!listing.images.isNullOrEmpty()) {
+                PhotoGallery(listing.images.mapNotNull { it.url }, galleryHeight = if (isTablet) 400.dp else 250.dp)
             }
 
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -373,7 +373,7 @@ private fun DetailContent(
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = "${listing.barangayLabel}, Cagayan de Oro",
+                        text = "${listing.barangayLabel ?: "CDO"}, Cagayan de Oro",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -390,7 +390,7 @@ private fun DetailContent(
                     Column {
                         Row(verticalAlignment = Alignment.Bottom) {
                             Text(
-                                text = "₱${"%,d".format(listing.priceMonthly)}",
+                                text = "₱${"%,d".format(listing.priceMonthly ?: 0)}",
                                 style = MaterialTheme.typography.headlineMedium,
                                 color = Orange500,
                                 fontWeight = FontWeight.Bold,
@@ -403,7 +403,7 @@ private fun DetailContent(
                         )
                     }
                     Text(
-                        text = listing.typeLabel,
+                        text = listing.typeLabel ?: "",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -473,7 +473,7 @@ private fun DetailContent(
                 }
 
                 // Amenities
-                if (listing.amenities.isNotEmpty()) {
+                if (!listing.amenities.isNullOrEmpty()) {
                     Spacer(Modifier.height(24.dp))
                     Text(
                         text = "Amenities",
@@ -486,7 +486,7 @@ private fun DetailContent(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        listing.amenities.forEach { amenity ->
+                        listing.amenities.orEmpty().forEach { amenity ->
                             Box(
                                 modifier = Modifier
                                     .background(
@@ -496,7 +496,7 @@ private fun DetailContent(
                                     .padding(horizontal = 14.dp, vertical = 8.dp),
                             ) {
                                 Text(
-                                    text = amenity.name,
+                                    text = amenity.name ?: "",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )

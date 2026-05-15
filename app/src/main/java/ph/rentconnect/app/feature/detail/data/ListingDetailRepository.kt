@@ -11,11 +11,11 @@ class ListingDetailRepository(private val api: ListingDetailApi) {
             val response = api.getListing(uuid)
             when {
                 response.isSuccessful -> {
-                    val body = response.body()
-                    if (body != null) {
-                        Result.Success(body.listing)
+                    val listing = response.body()?.listing
+                    if (listing != null) {
+                        Result.Success(listing)
                     } else {
-                        Result.Failure(ApiError.Unknown(IllegalStateException("Empty body")))
+                        Result.Failure(ApiError.NotFound)
                     }
                 }
                 response.code() == 404 -> Result.Failure(ApiError.NotFound)

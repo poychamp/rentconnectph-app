@@ -104,7 +104,7 @@ fun ListingCard(
                         .padding(horizontal = 8.dp, vertical = 4.dp),
                 ) {
                     Text(
-                        text = if (listing.imageCount == 1) "1 photo" else "${listing.imageCount} photos",
+                        text = if ((listing.imageCount ?: 0) == 1) "1 photo" else "${listing.imageCount ?: 0} photos",
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.White,
                         fontSize = 11.sp,
@@ -137,7 +137,7 @@ fun ListingCard(
                             .padding(horizontal = 10.dp, vertical = 4.dp),
                     ) {
                         Text(
-                            text = listing.typeLabel.uppercase(),
+                            text = (listing.typeLabel ?: "").uppercase(),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,

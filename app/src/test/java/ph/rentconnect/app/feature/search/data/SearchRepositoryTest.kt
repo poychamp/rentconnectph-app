@@ -48,9 +48,9 @@ class SearchRepositoryTest {
 
         assertTrue(result is Result.Success)
         val data = (result as Result.Success).data
-        assertEquals(2, data.data.size)
-        assertEquals("Durgan Drive Suites", data.data[0].title)
-        assertEquals("Janet Estates Suites", data.data[1].title)
+        assertEquals(2, data.data!!.size)
+        assertEquals("Durgan Drive Suites", data.data!![0].title)
+        assertEquals("Janet Estates Suites", data.data!![1].title)
     }
 
     @Test
@@ -59,7 +59,7 @@ class SearchRepositoryTest {
 
         val result = repository.search()
 
-        val meta = (result as Result.Success).data.meta
+        val meta = (result as Result.Success).data.meta!!
         assertEquals(1, meta.currentPage)
         assertEquals(5, meta.lastPage)
         assertEquals(24, meta.perPage)
@@ -98,9 +98,9 @@ class SearchRepositoryTest {
 
         assertTrue(result is Result.Success)
         val data = (result as Result.Success).data
-        assertEquals(0, data.data.size)
-        assertEquals(0, data.meta.total)
-        assertEquals(1, data.meta.lastPage)
+        assertEquals(0, data.data!!.size)
+        assertEquals(0, data.meta!!.total)
+        assertEquals(1, data.meta!!.lastPage)
     }
 
     @Test
@@ -109,7 +109,7 @@ class SearchRepositoryTest {
 
         val result = repository.search(query = "wifi", area = "carmen", budgetMin = 5000, budgetMax = 15000)
 
-        val filters = (result as Result.Success).data.filters
+        val filters = (result as Result.Success).data.filters!!
         assertEquals("wifi", filters.q)
         assertEquals("carmen", filters.area)
         assertEquals(5000, filters.budgetMin)

@@ -93,7 +93,7 @@ class HomeViewModelTest {
             assertTrue(state is HomeUiState.Success)
             assertTrue((state as HomeUiState.Success).featured.isEmpty())
             assertTrue(state.recently.isEmpty())
-            assertEquals(1, state.catalogs.listingTypes.size)
+            assertEquals(1, state.catalogs.listingTypes!!.size)
         }
     }
 

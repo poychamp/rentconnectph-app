@@ -393,7 +393,7 @@ private fun SuccessContent(
             // Hero
             item {
                 HeroSection(
-                    barangays = state.catalogs.barangays,
+                    barangays = state.catalogs.barangays.orEmpty(),
                     searchQuery = searchQuery,
                     selectedArea = selectedArea,
                     budgetMin = budgetMin,
@@ -409,7 +409,7 @@ private fun SuccessContent(
             // Property type chips
             item {
                 PropertyTypeChips(
-                    types = state.catalogs.listingTypes,
+                    types = state.catalogs.listingTypes.orEmpty(),
                     selectedTypes = selectedTypes,
                     onTypeToggle = onTypeToggle,
                     onClearTypes = onClearTypes,
@@ -522,10 +522,10 @@ private fun PropertyTypeChips(
         items(types) { type ->
             FilterChip(
                 selected = type.value in selectedTypes,
-                onClick = { onTypeToggle(type.value) },
+                onClick = { onTypeToggle(type.value ?: "") },
                 label = {
                     Text(
-                        text = type.label,
+                        text = type.label ?: "",
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Medium,
                     )

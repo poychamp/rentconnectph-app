@@ -462,10 +462,10 @@ private fun SearchContent(
                 items(types) { type ->
                     FilterChip(
                         selected = type.value in uiState.selectedTypes,
-                        onClick = { onTypeToggle(type.value) },
+                        onClick = { onTypeToggle(type.value ?: "") },
                         label = {
                             Text(
-                                text = type.label,
+                                text = type.label ?: "",
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.Medium,
                             )

@@ -48,10 +48,10 @@ class HomeRepositoryTest {
 
         assertTrue(result is Result.Success)
         val data = (result as Result.Success).data
-        assertEquals(1, data.featured.size)
-        assertEquals(1, data.recently.size)
+        assertEquals(1, data.featured!!.size)
+        assertEquals(1, data.recently!!.size)
 
-        val featured = data.featured[0]
+        val featured = data.featured!![0]
         assertEquals("abc-123", featured.uuid)
         assertEquals("Larkin Harbor Suites", featured.title)
         assertEquals("apartment", featured.type)
@@ -74,13 +74,13 @@ class HomeRepositoryTest {
         val result = repository.getHome()
 
         assertTrue(result is Result.Success)
-        val catalogs = (result as Result.Success).data.catalogs
-        assertEquals(2, catalogs.listingTypes.size)
-        assertEquals("apartment", catalogs.listingTypes[0].value)
-        assertEquals("Apartment", catalogs.listingTypes[0].label)
-        assertEquals(2, catalogs.barangays.size)
-        assertEquals("uptown", catalogs.barangays[0].value)
-        assertEquals("Uptown", catalogs.barangays[0].label)
+        val catalogs = (result as Result.Success).data.catalogs!!
+        assertEquals(2, catalogs.listingTypes!!.size)
+        assertEquals("apartment", catalogs.listingTypes!![0].value)
+        assertEquals("Apartment", catalogs.listingTypes!![0].label)
+        assertEquals(2, catalogs.barangays!!.size)
+        assertEquals("uptown", catalogs.barangays!![0].value)
+        assertEquals("Uptown", catalogs.barangays!![0].label)
     }
 
     @Test
@@ -91,9 +91,9 @@ class HomeRepositoryTest {
 
         assertTrue(result is Result.Success)
         val data = (result as Result.Success).data
-        assertTrue(data.featured.isEmpty())
-        assertTrue(data.recently.isEmpty())
-        assertEquals(2, data.catalogs.listingTypes.size)
+        assertTrue(data.featured!!.isEmpty())
+        assertTrue(data.recently!!.isEmpty())
+        assertEquals(2, data.catalogs!!.listingTypes!!.size)
     }
 
     @Test

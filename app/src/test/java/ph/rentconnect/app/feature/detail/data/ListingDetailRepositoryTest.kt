@@ -72,7 +72,7 @@ class ListingDetailRepositoryTest {
 
         val result = repository.getListing("019de8d4-9ab7-73b4-90ca-b439185d4e64")
 
-        val images = (result as Result.Success).data.images
+        val images = (result as Result.Success).data.images!!
         assertEquals(2, images.size)
         assertEquals("https://cdn.example.com/img1.jpg", images[0].url)
         assertEquals(1, images[0].sortOrder)
@@ -86,7 +86,7 @@ class ListingDetailRepositoryTest {
 
         val result = repository.getListing("019de8d4-9ab7-73b4-90ca-b439185d4e64")
 
-        val amenities = (result as Result.Success).data.amenities
+        val amenities = (result as Result.Success).data.amenities!!
         assertEquals(2, amenities.size)
         assertEquals("Parking", amenities[0].name)
         assertEquals("parking", amenities[0].slug)

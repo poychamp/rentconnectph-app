@@ -275,7 +275,7 @@ fun AreaFilter(
             )
             areas.forEach { area ->
                 DropdownMenuItem(
-                    text = { Text(area.label) },
+                    text = { Text(area.label ?: "") },
                     onClick = {
                         onAreaChange(area.value)
                         expanded = false
