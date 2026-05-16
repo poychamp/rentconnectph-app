@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ph.rentconnect.app.core.persistence.ThemeMode
+import ph.rentconnect.app.ui.gesture.swipeToBack
 import ph.rentconnect.app.ui.theme.Orange500
 
 @Composable
@@ -120,7 +121,11 @@ fun ContactSuccessScreen(
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(padding)
+                .swipeToBack(
+                    onDismiss = onBack,
+                    startZoneWidth = 9999.dp,
+                ),
         ) {
             val containerModifier = if (maxWidth >= 600.dp) {
                 Modifier

@@ -88,6 +88,7 @@ import kotlinx.coroutines.launch
 import ph.rentconnect.app.core.persistence.ThemeMode
 import ph.rentconnect.app.feature.detail.data.ListingDetail
 import ph.rentconnect.app.feature.detail.ui.components.LocationMapDisplay
+import ph.rentconnect.app.ui.gesture.swipeToBack
 import ph.rentconnect.app.ui.theme.Green500
 import ph.rentconnect.app.ui.theme.Orange500
 import java.time.OffsetDateTime
@@ -136,7 +137,11 @@ fun ListingDetailScreen(
             onRefresh = viewModel::refresh,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(padding)
+                .swipeToBack(
+                    onDismiss = onBack,
+                    startZoneWidth = 9999.dp,
+                ),
         ) {
             when (val state = uiState) {
                 is ListingDetailUiState.Loading -> LoadingContent(PaddingValues())
