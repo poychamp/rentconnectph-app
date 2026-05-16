@@ -67,6 +67,7 @@ import ph.rentconnect.app.feature.home.data.CatalogItem
 import ph.rentconnect.app.feature.home.ui.components.HeroSection
 import androidx.compose.foundation.isSystemInDarkTheme
 import ph.rentconnect.app.feature.home.ui.components.ListingCard
+import ph.rentconnect.app.ui.components.SecondaryOutlinedButton
 import ph.rentconnect.app.ui.theme.Orange500
 
 private const val DEBOUNCE_MS = 1000L
@@ -168,6 +169,7 @@ fun HomeScreen(
                     state = state,
                     isDarkTheme = isDarkTheme,
                     onListingClick = onListingClick,
+                    onNavigateToSearch = onNavigateToSearch,
                     searchQuery = searchQuery,
                     selectedArea = selectedArea,
                     budgetMin = budgetMin,
@@ -364,6 +366,7 @@ private fun SuccessContent(
     state: HomeUiState.Success,
     isDarkTheme: Boolean,
     onListingClick: (String) -> Unit,
+    onNavigateToSearch: () -> Unit,
     searchQuery: String,
     selectedArea: String?,
     budgetMin: Int?,
@@ -456,6 +459,7 @@ private fun SuccessContent(
                     title = "Recently Verified",
                     subtitle = "Fresh listings, all ground-checked",
                     actionLabel = "View all →",
+                    onActionClick = onNavigateToSearch,
                 )
             }
             if (isTablet) {
@@ -551,12 +555,13 @@ private fun SectionHeader(
     title: String,
     subtitle: String,
     actionLabel: String? = null,
+    onActionClick: (() -> Unit)? = null,
 ) {
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = title,
@@ -566,12 +571,20 @@ private fun SectionHeader(
                 fontSize = 20.sp,
             )
             if (actionLabel != null) {
-                Text(
-                    text = actionLabel,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Orange500,
-                    fontWeight = FontWeight.Medium,
-                )
+                if (onActionClick != null) {
+                    SecondaryOutlinedButton(
+                        text = actionLabel,
+                        onClick = onActionClick,
+                        isCompact = true,
+                    )
+                } else {
+                    Text(
+                        text = actionLabel,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Orange500,
+                        fontWeight = FontWeight.Medium,
+                    )
+                }
             }
         }
         Spacer(Modifier.height(2.dp))

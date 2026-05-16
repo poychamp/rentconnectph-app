@@ -1,6 +1,5 @@
 package ph.rentconnect.app.feature.search.ui
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -55,12 +54,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -82,6 +79,7 @@ import ph.rentconnect.app.core.persistence.ThemeMode
 import ph.rentconnect.app.feature.home.ui.components.AreaFilter
 import ph.rentconnect.app.feature.home.ui.components.BudgetFilter
 import ph.rentconnect.app.feature.home.ui.components.ListingCard
+import ph.rentconnect.app.ui.components.SecondaryOutlinedButton
 import ph.rentconnect.app.ui.theme.Orange500
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -498,7 +496,7 @@ private fun SearchContent(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                        .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 14.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -508,14 +506,11 @@ private fun SearchContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     if (hasFilters) {
-                        TextButton(onClick = onClearFilters) {
-                            Text(
-                                text = "Clear filters",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Orange500,
-                                fontWeight = FontWeight.Medium,
-                            )
-                        }
+                        SecondaryOutlinedButton(
+                            text = "Clear filters",
+                            onClick = onClearFilters,
+                            isCompact = true,
+                        )
                     }
                 }
             }
@@ -607,17 +602,11 @@ private fun SearchContent(
                             )
                             if (hasFilters) {
                                 Spacer(Modifier.height(16.dp))
-                                OutlinedButton(
+                                SecondaryOutlinedButton(
+                                    text = "Clear filters",
                                     onClick = onClearFilters,
-                                    shape = RoundedCornerShape(20.dp),
-                                    border = BorderStroke(1.dp, Orange500),
-                                ) {
-                                    Text(
-                                        text = "Clear filters",
-                                        color = Orange500,
-                                        fontWeight = FontWeight.Medium,
-                                    )
-                                }
+                                    isCompact = false,
+                                )
                             }
                         }
                     }
