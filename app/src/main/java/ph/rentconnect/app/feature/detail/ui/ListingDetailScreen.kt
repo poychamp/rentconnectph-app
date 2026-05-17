@@ -1,6 +1,7 @@
 package ph.rentconnect.app.feature.detail.ui
 
 import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import ph.rentconnect.app.BuildConfig
 import androidx.compose.foundation.clickable
@@ -88,6 +89,7 @@ import kotlinx.coroutines.launch
 import ph.rentconnect.app.core.persistence.ThemeMode
 import ph.rentconnect.app.feature.detail.data.ListingDetail
 import ph.rentconnect.app.feature.detail.ui.components.LocationMapDisplay
+import ph.rentconnect.app.ui.components.SecondaryOutlinedButton
 import ph.rentconnect.app.ui.gesture.swipeToBack
 import ph.rentconnect.app.ui.theme.Green500
 import ph.rentconnect.app.ui.theme.Orange500
@@ -525,6 +527,15 @@ private fun DetailContent(
                         longitude = listing.longitude,
                         onTouchChanged = { mapTouching = it },
                         modifier = Modifier.clip(RoundedCornerShape(12.dp)),
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    val mapsUrl = "https://www.google.com/maps/search/?api=1&query=${listing.latitude},${listing.longitude}"
+                    SecondaryOutlinedButton(
+                        text = "Open in Google Maps",
+                        onClick = {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(mapsUrl)))
+                        },
+                        isCompact = false,
                     )
                 } else {
                     Box(
