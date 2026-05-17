@@ -1,9 +1,5 @@
 package ph.rentconnect.app.feature.detail.ui.components
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -24,15 +20,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.MapsInitializer
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
-import androidx.compose.ui.geometry.Offset
 import com.google.maps.android.compose.CameraMoveStartedReason
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -40,7 +31,6 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
-import ph.rentconnect.app.R
 
 @Composable
 fun LocationMapDisplay(
@@ -49,8 +39,6 @@ fun LocationMapDisplay(
     onTouchChanged: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    val isDark = isSystemInDarkTheme()
-    val context = LocalContext.current
     val position = remember(latitude, longitude) { LatLng(latitude, longitude) }
     var currentZoom by remember { mutableFloatStateOf(15f) }
 
@@ -69,16 +57,8 @@ fun LocationMapDisplay(
         }
     }
 
-    val mapStyleOptions = remember(isDark) {
-        if (isDark) {
-            MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style_dark)
-        } else {
-            null
-        }
-    }
-
-    val mapProperties = remember(mapStyleOptions) {
-        MapProperties(mapStyleOptions = mapStyleOptions)
+    val mapProperties = remember {
+        MapProperties()
     }
 
     val uiSettings = remember {
@@ -94,12 +74,6 @@ fun LocationMapDisplay(
         )
     }
 
-    val markerBitmap = remember { createOrangeMarker() }
-    val markerIcon = remember(markerBitmap) {
-        MapsInitializer.initialize(context)
-        BitmapDescriptorFactory.fromBitmap(markerBitmap)
-    }
-
     Box(modifier = modifier) {
         GoogleMap(
             modifier = Modifier
@@ -112,8 +86,6 @@ fun LocationMapDisplay(
         ) {
             Marker(
                 state = MarkerState(position = position),
-                icon = markerIcon,
-                anchor = Offset(0.5f, 0.5f),
             )
         }
 
@@ -147,20 +119,4 @@ fun LocationMapDisplay(
             }
         }
     }
-}
-
-private fun createOrangeMarker(): Bitmap {
-    val sizePx = 40
-    val strokePx = 4f
-    val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
-    val canvas = Canvas(bitmap)
-    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    paint.color = 0xFFF97316.toInt()
-    paint.style = Paint.Style.FILL
-    canvas.drawCircle(sizePx / 2f, sizePx / 2f, sizePx / 2f - strokePx / 2f, paint)
-    paint.color = 0xFFFFFFFF.toInt()
-    paint.style = Paint.Style.STROKE
-    paint.strokeWidth = strokePx
-    canvas.drawCircle(sizePx / 2f, sizePx / 2f, sizePx / 2f - strokePx / 2f, paint)
-    return bitmap
 }
