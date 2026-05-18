@@ -21,7 +21,29 @@ class InquiryRepository(
                 body = requestBody.toRequestBody("application/json".toMediaType()),
             )
             when (response.code()) {
-                200 -> InquiryResult.Success
+                200 -> {
+                    val body = response.body()?.string()
+                    if (body != null) {
+                        val parsed = json.decodeFromString(
+                            InquirySuccessResponse.serializer(),
+                            body,
+                        )
+                        val listing = parsed.listing
+                        val contact = listing.listingContact
+                        InquiryResult.Success(
+                            InquiryContactInfo(
+                                listingTitle = listing.title,
+                                barangay = listing.barangay,
+                                contactTypeLabel = listing.contactTypeLabel,
+                                contactPhone = contact?.phone,
+                                contactName = contact?.name,
+                                contactNotes = contact?.notes,
+                            )
+                        )
+                    } else {
+                        InquiryResult.ServerError
+                    }
+                }
                 404 -> InquiryResult.NotFound
                 422 -> {
                     val errorBody = response.errorBody()?.string()

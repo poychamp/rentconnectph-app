@@ -35,6 +35,7 @@ import ph.rentconnect.app.feature.contact.ui.ContactScreen
 import ph.rentconnect.app.feature.contact.ui.ContactSuccessScreen
 import ph.rentconnect.app.feature.contact.ui.ContactViewModel
 import ph.rentconnect.app.feature.contact.ui.ContactViewModelFactory
+import ph.rentconnect.app.feature.detail.data.InquiryContactInfo
 import ph.rentconnect.app.feature.detail.ui.InquirySuccessScreen
 import ph.rentconnect.app.feature.detail.ui.ListingDetailScreen
 import ph.rentconnect.app.feature.detail.ui.ListingDetailViewModel
@@ -69,7 +70,14 @@ data class SearchRoute(
 data class DetailRoute(val uuid: String)
 
 @Serializable
-data class InquirySuccessRoute(val listingName: String)
+data class InquirySuccessRoute(
+    val listingTitle: String,
+    val barangay: String,
+    val contactTypeLabel: String? = null,
+    val contactPhone: String? = null,
+    val contactName: String? = null,
+    val contactNotes: String? = null,
+)
 
 @Serializable
 data object AboutRoute
@@ -225,8 +233,17 @@ class MainActivity : ComponentActivity() {
                             themeMode = themeMode,
                             onThemeToggle = themePreferences::setThemeMode,
                             onBack = { navController.popBackStack() },
-                            onInquirySuccess = { listingName ->
-                                navController.navigate(InquirySuccessRoute(listingName)) {
+                            onInquirySuccess = { contactInfo ->
+                                navController.navigate(
+                                    InquirySuccessRoute(
+                                        listingTitle = contactInfo.listingTitle,
+                                        barangay = contactInfo.barangay,
+                                        contactTypeLabel = contactInfo.contactTypeLabel,
+                                        contactPhone = contactInfo.contactPhone,
+                                        contactName = contactInfo.contactName,
+                                        contactNotes = contactInfo.contactNotes,
+                                    )
+                                ) {
                                     launchSingleTop = true
                                 }
                             },
@@ -235,16 +252,17 @@ class MainActivity : ComponentActivity() {
                     composable<InquirySuccessRoute> { backStackEntry ->
                         val route = backStackEntry.toRoute<InquirySuccessRoute>()
                         InquirySuccessScreen(
-                            listingName = route.listingName,
+                            contactInfo = InquiryContactInfo(
+                                listingTitle = route.listingTitle,
+                                barangay = route.barangay,
+                                contactTypeLabel = route.contactTypeLabel,
+                                contactPhone = route.contactPhone,
+                                contactName = route.contactName,
+                                contactNotes = route.contactNotes,
+                            ),
                             themeMode = themeMode,
                             onThemeToggle = themePreferences::setThemeMode,
                             onBack = { navController.popBackStack() },
-                            onBrowseMore = {
-                                navController.navigate(SearchRoute()) {
-                                    popUpTo(HomeRoute) { saveState = true }
-                                    launchSingleTop = true
-                                }
-                            },
                         )
                     }
                     composable<AboutRoute> {

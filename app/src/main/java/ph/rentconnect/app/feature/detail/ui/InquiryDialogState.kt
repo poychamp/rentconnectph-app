@@ -1,5 +1,7 @@
 package ph.rentconnect.app.feature.detail.ui
 
+import ph.rentconnect.app.feature.detail.data.InquiryContactInfo
+
 sealed interface InquiryDialogState {
     data object Hidden : InquiryDialogState
 
@@ -11,5 +13,5 @@ sealed interface InquiryDialogState {
         val submitError: String? = null,
     ) : InquiryDialogState
 
-    data object Success : InquiryDialogState
+    data class Success(val contactInfo: InquiryContactInfo) : InquiryDialogState
 }

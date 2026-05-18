@@ -109,7 +109,7 @@ class ListingDetailViewModel(
         _inquiryState.value = current.copy(isSubmitting = true, fieldErrors = emptyMap(), submitError = null)
         viewModelScope.launch {
             _inquiryState.value = when (val result = repo.submitInquiry(uuid, current.name, current.phone)) {
-                is InquiryResult.Success -> InquiryDialogState.Success
+                is InquiryResult.Success -> InquiryDialogState.Success(result.contactInfo)
                 is InquiryResult.ValidationError -> current.copy(
                     isSubmitting = false,
                     fieldErrors = result.errors,

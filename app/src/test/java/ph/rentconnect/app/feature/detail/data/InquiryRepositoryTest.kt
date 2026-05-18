@@ -7,6 +7,7 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -39,12 +40,37 @@ class InquiryRepositoryTest {
     }
 
     @Test
-    fun `it returns Success on 200`() = runTest {
-        server.enqueue(MockResponse().setResponseCode(200).setBody("""{"success":true}"""))
+    fun `it returns Success with contact info on 200`() = runTest {
+        server.enqueue(
+            MockResponse().setResponseCode(200).setBody(
+                """
+                {
+                    "success": true,
+                    "listing": {
+                        "title": "Beachfront Condo",
+                        "barangay": "Pueblo de Oro",
+                        "contact_type_label": "Owner",
+                        "listing_contact": {
+                            "phone": "+639171234567",
+                            "name": "Juan Dela Cruz",
+                            "notes": "Text first before calling."
+                        }
+                    }
+                }
+                """.trimIndent()
+            )
+        )
 
         val result = repository.submitInquiry(LISTING_UUID, "Maria Cruz", "09171234567")
 
         assertTrue(result is InquiryResult.Success)
+        val contact = (result as InquiryResult.Success).contactInfo
+        assertEquals("Beachfront Condo", contact.listingTitle)
+        assertEquals("Pueblo de Oro", contact.barangay)
+        assertEquals("Owner", contact.contactTypeLabel)
+        assertEquals("+639171234567", contact.contactPhone)
+        assertEquals("Juan Dela Cruz", contact.contactName)
+        assertEquals("Text first before calling.", contact.contactNotes)
 
         val request = server.takeRequest()
         assertEquals("POST", request.method)
@@ -55,12 +81,74 @@ class InquiryRepositoryTest {
     }
 
     @Test
+    fun `it returns Success with null optional fields on 200`() = runTest {
+        server.enqueue(
+            MockResponse().setResponseCode(200).setBody(
+                """
+                {
+                    "success": true,
+                    "listing": {
+                        "title": "Studio Apartment",
+                        "barangay": "Carmen",
+                        "contact_type_label": null,
+                        "listing_contact": {
+                            "phone": null,
+                            "name": null,
+                            "notes": null
+                        }
+                    }
+                }
+                """.trimIndent()
+            )
+        )
+
+        val result = repository.submitInquiry(LISTING_UUID, "Maria Cruz", "09171234567")
+
+        assertTrue(result is InquiryResult.Success)
+        val contact = (result as InquiryResult.Success).contactInfo
+        assertEquals("Studio Apartment", contact.listingTitle)
+        assertEquals("Carmen", contact.barangay)
+        assertNull(contact.contactTypeLabel)
+        assertNull(contact.contactPhone)
+        assertNull(contact.contactName)
+        assertNull(contact.contactNotes)
+    }
+
+    @Test
+    fun `it returns Success with missing listing_contact on 200`() = runTest {
+        server.enqueue(
+            MockResponse().setResponseCode(200).setBody(
+                """
+                {
+                    "success": true,
+                    "listing": {
+                        "title": "Budget Room",
+                        "barangay": "Kauswagan"
+                    }
+                }
+                """.trimIndent()
+            )
+        )
+
+        val result = repository.submitInquiry(LISTING_UUID, "Maria Cruz", "09171234567")
+
+        assertTrue(result is InquiryResult.Success)
+        val contact = (result as InquiryResult.Success).contactInfo
+        assertEquals("Budget Room", contact.listingTitle)
+        assertEquals("Kauswagan", contact.barangay)
+        assertNull(contact.contactTypeLabel)
+        assertNull(contact.contactPhone)
+        assertNull(contact.contactName)
+        assertNull(contact.contactNotes)
+    }
+
+    @Test
     fun `it returns ValidationError on 422 with field errors`() = runTest {
         server.enqueue(
             MockResponse().setResponseCode(422).setBody(
                 """
                 {
-                    "message": "The name field is required.",
+                    "message": "The given data was invalid.",
                     "errors": {
                         "name": ["Name is required."],
                         "phone": ["Invalid PH mobile number."]

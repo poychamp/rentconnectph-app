@@ -20,6 +20,7 @@ import ph.rentconnect.app.core.network.Result
 import ph.rentconnect.app.feature.detail.data.ListingAmenity
 import ph.rentconnect.app.feature.detail.data.ListingDetail
 import ph.rentconnect.app.feature.detail.data.ListingDetailRepository
+import ph.rentconnect.app.feature.detail.data.InquiryContactInfo
 import ph.rentconnect.app.feature.detail.data.InquiryRepository
 import ph.rentconnect.app.feature.detail.data.InquiryResult
 import ph.rentconnect.app.feature.detail.data.ListingImage
@@ -158,10 +159,11 @@ class ListingDetailViewModelTest {
     }
 
     @Test
-    fun `it submits inquiry and shows success`() = runTest {
+    fun `it submits inquiry and shows success with contact info`() = runTest {
         coEvery { repository.getListing(any()) } returns Result.Success(listingDetail())
         val inquiryRepository = mockk<InquiryRepository>()
-        coEvery { inquiryRepository.submitInquiry(any(), any(), any()) } returns InquiryResult.Success
+        coEvery { inquiryRepository.submitInquiry(any(), any(), any()) } returns
+            InquiryResult.Success(inquiryContactInfo())
 
         val viewModel = ListingDetailViewModel("abc-123", repository, inquiryRepository)
 
@@ -174,13 +176,15 @@ class ListingDetailViewModelTest {
             viewModel.updateInquiryPhone("09171234567")
             skipItems(1)
             viewModel.submitInquiry()
-            // Submitting state
             val submitting = awaitItem()
             assertTrue(submitting is InquiryDialogState.Visible)
             assertTrue((submitting as InquiryDialogState.Visible).isSubmitting)
-            // Success state
             val success = awaitItem()
             assertTrue(success is InquiryDialogState.Success)
+            val contact = (success as InquiryDialogState.Success).contactInfo
+            assertEquals("Beachfront Condo", contact.listingTitle)
+            assertEquals("+639171234567", contact.contactPhone)
+            assertEquals("Juan Dela Cruz", contact.contactName)
         }
     }
 
@@ -268,7 +272,8 @@ class ListingDetailViewModelTest {
     fun `it dismisses success state back to hidden`() = runTest {
         coEvery { repository.getListing(any()) } returns Result.Success(listingDetail())
         val inquiryRepository = mockk<InquiryRepository>()
-        coEvery { inquiryRepository.submitInquiry(any(), any(), any()) } returns InquiryResult.Success
+        coEvery { inquiryRepository.submitInquiry(any(), any(), any()) } returns
+            InquiryResult.Success(inquiryContactInfo())
 
         val viewModel = ListingDetailViewModel("abc-123", repository, inquiryRepository)
 
@@ -316,4 +321,13 @@ class ListingDetailViewModelTest {
         barangay, barangayLabel, latitude, longitude, description, verifiedAt, listedAt,
         images, amenities,
     )
+
+    private fun inquiryContactInfo(
+        listingTitle: String = "Beachfront Condo",
+        barangay: String = "Pueblo de Oro",
+        contactTypeLabel: String? = "Owner",
+        contactPhone: String? = "+639171234567",
+        contactName: String? = "Juan Dela Cruz",
+        contactNotes: String? = "Text first before calling.",
+    ) = InquiryContactInfo(listingTitle, barangay, contactTypeLabel, contactPhone, contactName, contactNotes)
 }

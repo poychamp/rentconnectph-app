@@ -1,7 +1,6 @@
 package ph.rentconnect.app.feature.about.ui
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -49,7 +48,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
@@ -57,7 +55,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -113,7 +110,6 @@ fun AboutScreen(
                 AboutHeroSection(onBrowseListings = onBrowseListings)
                 OurStorySection(isTablet = isTablet)
                 HowItWorksSection(isTablet = isTablet)
-                MeetTheBrokerSection(isTablet = isTablet)
                 FeatureCardsSection(isTablet = isTablet)
                 CtaBannerSection(onBrowseListings = onBrowseListings, isTablet = isTablet)
                 AboutFooterSection()
@@ -244,30 +240,19 @@ private fun AboutHeroSection(onBrowseListings: () -> Unit) {
 
         Spacer(Modifier.height(24.dp))
 
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedButton(
-                onClick = onBrowseListings,
-                shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f)),
-            ) {
-                Icon(
-                    Icons.Filled.Search,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(16.dp),
-                )
-                Spacer(Modifier.width(6.dp))
-                Text("Browse listings", color = Color.White)
-            }
-            Button(
-                onClick = {},
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White.copy(alpha = 0.15f),
-                ),
-            ) {
-                Text("How it works", color = Color.White)
-            }
+        OutlinedButton(
+            onClick = onBrowseListings,
+            shape = RoundedCornerShape(8.dp),
+            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f)),
+        ) {
+            Icon(
+                Icons.Filled.Search,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(16.dp),
+            )
+            Spacer(Modifier.width(6.dp))
+            Text("Browse listings", color = Color.White)
         }
     }
 }
@@ -299,13 +284,13 @@ private fun OurStorySection(isTablet: Boolean = false) {
             }
             Column(modifier = Modifier.weight(1.5f)) {
                 Text(
-                    text = "Cagayan de Oro\u2019s rental market is fragmented across Facebook Marketplace, classified groups, and informal listings. Renters spend hours sorting through unreliable posts, often without a clear way to verify what is available or who they are dealing with.",
+                    text = "Cagayan de Oro\u2019s rental market is fragmented across Facebook Marketplace, classified groups, and informal posts. Renters spend hours sorting through unreliable listings.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    text = "RentConnectPH centralizes verified rental listings from CDO property owners into a single platform \u2014 searchable, filterable, with clear photos and PHP pricing. Owners reach renters through a trusted channel. Renters get a vetted shortlist, with a licensed broker handling the lease at closing.",
+                    text = "RentConnectPH puts verified CDO rentals in one place \u2014 searchable, filterable, with clear photos and PHP pricing. Every listing is checked in person by our team before it goes live. Submit your name and number on a listing to receive the owner\u2019s contact details directly.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -333,13 +318,13 @@ private fun OurStorySection(isTablet: Boolean = false) {
             )
             Spacer(Modifier.height(16.dp))
             Text(
-                text = "Cagayan de Oro\u2019s rental market is fragmented across Facebook Marketplace, classified groups, and informal listings. Renters spend hours sorting through unreliable posts, often without a clear way to verify what is available or who they are dealing with.",
+                text = "Cagayan de Oro\u2019s rental market is fragmented across Facebook Marketplace, classified groups, and informal posts. Renters spend hours sorting through unreliable listings.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "RentConnectPH centralizes verified rental listings from CDO property owners into a single platform \u2014 searchable, filterable, with clear photos and PHP pricing. Owners reach renters through a trusted channel. Renters get a vetted shortlist, with a licensed broker handling the lease at closing.",
+                text = "RentConnectPH puts verified CDO rentals in one place \u2014 searchable, filterable, with clear photos and PHP pricing. Every listing is checked in person by our team before it goes live. Submit your name and number on a listing to receive the owner\u2019s contact details directly.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -378,19 +363,19 @@ private fun HowItWorksSection(isTablet: Boolean = false) {
                 StepCard(
                     step = "STEP 01",
                     title = "Search verified listings",
-                    description = "Every listing on RentConnectPH is reviewed by our team before publishing. Photos, address, and pricing are verified, so what you see reflects what is actually available.",
+                    description = "Every listing is reviewed by our team in person before publishing.",
                     modifier = Modifier.weight(1f),
                 )
                 StepCard(
                     step = "STEP 02",
-                    title = "Send an inquiry",
-                    description = "Submit an inquiry on any listing with your move-in date and basic requirements. Our team contacts you to confirm details and arranges a viewing with the property owner.",
+                    title = "Get the contact",
+                    description = "Submit your name and mobile number on any listing to receive the owner\u2019s contact details.",
                     modifier = Modifier.weight(1f),
                 )
                 StepCard(
                     step = "STEP 03",
-                    title = "Sign with a licensed broker",
-                    description = "When you\u2019re ready to commit, our PRC-licensed broker handles the closing \u2014 drafting the lease, negotiating terms, and documenting deposits and fees clearly.",
+                    title = "Reach out to the owner",
+                    description = "Coordinate the viewing, agree on terms, and sign the lease directly with the property owner.",
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -451,143 +436,6 @@ private fun StepCard(step: String, title: String, description: String, modifier:
 }
 
 @Composable
-private fun MeetTheBrokerSection(isTablet: Boolean = false) {
-    if (isTablet) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 32.dp),
-            horizontalArrangement = Arrangement.spacedBy(24.dp),
-        ) {
-            Image(
-                painter = painterResource(R.drawable.broker),
-                contentDescription = "Marco V. Reyes",
-                modifier = Modifier
-                    .weight(1f)
-                    .height(320.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Crop,
-            )
-            Column(modifier = Modifier.weight(1.5f)) {
-                Text(
-                    text = "MEET THE BROKER",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Orange500,
-                    letterSpacing = 1.sp,
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = "Marco V. Reyes",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = "PRC-Licensed Real Estate Broker \u00B7 PRB Lic. #0028451",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.height(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Filled.CheckCircle,
-                        contentDescription = null,
-                        tint = Color(0xFF22C55E),
-                        modifier = Modifier.size(16.dp),
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        text = "PAREB-CDO Chapter Member",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Medium,
-                        color = Color(0xFF22C55E),
-                    )
-                }
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    text = "Marco has spent the last twelve years brokering rentals across Cagayan de Oro, with experience spanning studio condos in Pueblo de Oro, family homes in Carmen, and properties throughout Lapasan. His practice centers on what tenants prioritize: fair pricing, responsive landlords, and clear terms at move\u2011in.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    text = "He partnered with RentConnectPH because the verification model aligns with how he prefers to broker \u2014 owners vetted up front, paperwork executed properly at closing, and a structured process throughout. Every lease that closes through the platform is drafted and witnessed by Marco personally, ensuring accountability on every contract.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-    } else {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 32.dp),
-        ) {
-            Image(
-                painter = painterResource(R.drawable.broker),
-                contentDescription = "Marco V. Reyes",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(280.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Crop,
-            )
-            Spacer(Modifier.height(20.dp))
-            Text(
-                text = "MEET THE BROKER",
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                color = Orange500,
-                letterSpacing = 1.sp,
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "Marco V. Reyes",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = "PRC-Licensed Real Estate Broker \u00B7 PRB Lic. #0028451",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(4.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Filled.CheckCircle,
-                    contentDescription = null,
-                    tint = Color(0xFF22C55E),
-                    modifier = Modifier.size(16.dp),
-                )
-                Spacer(Modifier.width(4.dp))
-                Text(
-                    text = "PAREB-CDO Chapter Member",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Medium,
-                    color = Color(0xFF22C55E),
-                )
-            }
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = "Marco has spent the last twelve years brokering rentals across Cagayan de Oro, with experience spanning studio condos in Pueblo de Oro, family homes in Carmen, and properties throughout Lapasan. His practice centers on what tenants prioritize: fair pricing, responsive landlords, and clear terms at move\u2011in.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(12.dp))
-            Text(
-                text = "He partnered with RentConnectPH because the verification model aligns with how he prefers to broker \u2014 owners vetted up front, paperwork executed properly at closing, and a structured process throughout. Every lease that closes through the platform is drafted and witnessed by Marco personally, ensuring accountability on every contract.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
-
-@Composable
 private fun FeatureCardsSection(isTablet: Boolean = false) {
     if (isTablet) {
         Column(
@@ -603,12 +451,12 @@ private fun FeatureCardsSection(isTablet: Boolean = false) {
             ) {
                 FeatureCard(
                     title = "Cagayan de Oro\u2013first",
-                    description = "Focused on CDO neighborhoods including Pueblo de Oro, Carmen, Kauswagan, and Lapasan, with continued expansion.",
+                    description = "Focused on CDO neighborhoods including Pueblo de Oro, Carmen, Kauswagan, and Lapasan.",
                     modifier = Modifier.weight(1f),
                 )
                 FeatureCard(
-                    title = "Every listing verified",
-                    description = "Each listing is reviewed by our team before publishing, with photos, address, and pricing verified.",
+                    title = "Every listing verified in person",
+                    description = "Each listing is visited by our team on-site before publishing.",
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -617,13 +465,13 @@ private fun FeatureCardsSection(isTablet: Boolean = false) {
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 FeatureCard(
-                    title = "Licensed broker on every lease",
-                    description = "Every closing is handled by our PRC-licensed broker, who drafts the lease and negotiates final terms.",
+                    title = "Direct owner contact",
+                    description = "Renters receive the owner\u2019s contact details after submitting an inquiry.",
                     modifier = Modifier.weight(1f),
                 )
                 FeatureCard(
                     title = "Transparent pricing",
-                    description = "All pricing in PHP. Monthly rent, deposits, and any platform fees disclosed before inquiry.",
+                    description = "All pricing in PHP. Monthly rent and deposits disclosed on the listing.",
                     modifier = Modifier.weight(1f),
                 )
             }

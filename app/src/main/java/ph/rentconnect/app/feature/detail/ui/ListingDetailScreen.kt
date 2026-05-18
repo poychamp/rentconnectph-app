@@ -104,13 +104,11 @@ fun ListingDetailScreen(
     themeMode: ThemeMode,
     onThemeToggle: suspend (ThemeMode) -> Unit,
     onBack: () -> Unit,
-    onInquirySuccess: (listingName: String) -> Unit = {},
+    onInquirySuccess: (contactInfo: ph.rentconnect.app.feature.detail.data.InquiryContactInfo) -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val inquiryState by viewModel.inquiryState.collectAsStateWithLifecycle()
-
-    val listingName = (uiState as? ListingDetailUiState.Success)?.listing?.title ?: ""
 
     when (val inquiry = inquiryState) {
         is InquiryDialogState.Visible -> {
@@ -125,8 +123,9 @@ fun ListingDetailScreen(
             )
         }
         is InquiryDialogState.Success -> {
+            val contactInfo = inquiry.contactInfo
             viewModel.closeInquiryDialog()
-            onInquirySuccess(listingName)
+            onInquirySuccess(contactInfo)
         }
         is InquiryDialogState.Hidden -> {}
     }
@@ -561,7 +560,7 @@ private fun DetailContent(
             }
         }
 
-        // Sticky Inquire Now button
+        // Sticky Get Contact button
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -576,7 +575,7 @@ private fun DetailContent(
                 colors = ButtonDefaults.buttonColors(containerColor = Orange500),
             ) {
                 Text(
-                    text = "Inquire Now  →",
+                    text = "Get Contact  →",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(vertical = 4.dp),
