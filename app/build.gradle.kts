@@ -31,6 +31,19 @@ android {
         manifestPlaceholders["mapsApiKey"] = mapsKey
     }
 
+    signingConfigs {
+        create("release") {
+            val localProps = rootProject.file("local.properties")
+            if (localProps.exists()) {
+                val props = Properties().apply { localProps.inputStream().use(::load) }
+                storeFile = rootProject.file(props.getProperty("RELEASE_STORE_FILE", ""))
+                storePassword = props.getProperty("RELEASE_STORE_PASSWORD", "")
+                keyAlias = props.getProperty("RELEASE_KEY_ALIAS", "")
+                keyPassword = props.getProperty("RELEASE_KEY_PASSWORD", "")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -38,6 +51,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
