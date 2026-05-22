@@ -420,37 +420,39 @@ private fun SuccessContent(
             }
 
             // Featured Listings
-            item {
-                SectionHeader(
-                    title = "Featured Listings",
-                    subtitle = "Hand-picked by RentConnectPH",
-                )
-            }
-            if (isTablet) {
-                items(state.featured.chunked(2), key = { "featured_row_${it.first().uuid}" }) { row ->
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        row.forEach { listing ->
-                            ListingCard(
-                                listing,
-                                onClick = { onListingClick(listing.uuid) },
-                                modifier = Modifier.weight(1f),
-                            )
+            if (state.featured.isNotEmpty()) {
+                item {
+                    SectionHeader(
+                        title = "Featured Listings",
+                        subtitle = "Hand-picked by RentConnectPH",
+                    )
+                }
+                if (isTablet) {
+                    items(state.featured.chunked(2), key = { "featured_row_${it.first().uuid}" }) { row ->
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            row.forEach { listing ->
+                                ListingCard(
+                                    listing,
+                                    onClick = { onListingClick(listing.uuid) },
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                            if (row.size == 1) Spacer(Modifier.weight(1f))
                         }
-                        if (row.size == 1) Spacer(Modifier.weight(1f))
+                    }
+                } else {
+                    items(state.featured, key = { "featured_${it.uuid}" }) { listing ->
+                        ListingCard(listing, onClick = { onListingClick(listing.uuid) })
                     }
                 }
-            } else {
-                items(state.featured, key = { "featured_${it.uuid}" }) { listing ->
-                    ListingCard(listing, onClick = { onListingClick(listing.uuid) })
-                }
-            }
 
-            // Divider
-            item {
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
-                    color = MaterialTheme.colorScheme.outlineVariant,
-                )
+                // Divider
+                item {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                    )
+                }
             }
 
             // Recently Verified

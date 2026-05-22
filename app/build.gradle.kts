@@ -18,8 +18,8 @@ android {
         applicationId = "ph.rentconnect.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 10002
-        versionName = "1.0.2"
+        versionCode = 10004
+        versionName = "1.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -64,7 +64,6 @@ android {
         }
         create("dev") {
             dimension = "environment"
-            applicationIdSuffix = ".dev"
             buildConfigField("String", "BASE_URL", "\"https://mirthful-antwerp-mant2tajxy69.on-vapor.com\"")
         }
         create("staging") {
