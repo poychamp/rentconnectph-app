@@ -107,26 +107,23 @@ fun SearchScreen(
                 .fillMaxSize()
                 .padding(padding),
         ) {
-            when {
-                uiState.isLoading && uiState.items.isEmpty() -> LoadingContent()
-                uiState.error != null && uiState.items.isEmpty() -> ErrorContent(onRetry = viewModel::refresh)
-                else -> SearchContent(
-                    uiState = uiState,
-                    isDarkTheme = when (themeMode) {
-                        ThemeMode.Light -> false
-                        ThemeMode.Dark -> true
-                        ThemeMode.System -> isSystemInDarkTheme()
-                    },
-                    onSearchQueryChange = viewModel::onSearchQueryChange,
-                    onAreaChange = viewModel::onAreaChange,
-                    onTypeToggle = viewModel::onTypeToggle,
-                    onBudgetChange = viewModel::onBudgetChange,
-                    onSubmitNow = viewModel::submitNow,
-                    onClearFilters = viewModel::clearFilters,
-                    onLoadMore = viewModel::loadNextPage,
-                    onListingClick = onListingClick,
-                )
-            }
+            SearchContent(
+                uiState = uiState,
+                isDarkTheme = when (themeMode) {
+                    ThemeMode.Light -> false
+                    ThemeMode.Dark -> true
+                    ThemeMode.System -> isSystemInDarkTheme()
+                },
+                onSearchQueryChange = viewModel::onSearchQueryChange,
+                onAreaChange = viewModel::onAreaChange,
+                onTypeToggle = viewModel::onTypeToggle,
+                onBudgetChange = viewModel::onBudgetChange,
+                onSubmitNow = viewModel::submitNow,
+                onClearFilters = viewModel::clearFilters,
+                onLoadMore = viewModel::loadNextPage,
+                onListingClick = onListingClick,
+                onRetry = viewModel::refresh,
+            )
         }
     }
 }
@@ -262,6 +259,7 @@ private fun SearchContent(
     onClearFilters: () -> Unit,
     onLoadMore: () -> Unit,
     onListingClick: (String) -> Unit,
+    onRetry: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val listState = rememberLazyListState()
@@ -516,67 +514,44 @@ private fun SearchContent(
             }
         }
 
-        // Listing cards
-        if (isTablet) {
-            items(uiState.items.chunked(2), key = { "search_row_${it.first().uuid}" }) { row ->
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    row.forEach { listing ->
-                        ListingCard(
-                            listing,
-                            onClick = { onListingClick(listing.uuid) },
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-                    if (row.size == 1) Spacer(Modifier.weight(1f))
-                }
-            }
-        } else {
-            items(uiState.items, key = { "search_${it.uuid}" }) { listing ->
-                ListingCard(listing, onClick = { onListingClick(listing.uuid) })
-            }
-        }
-
-        // Load more / end states
-        item {
-            when {
-                uiState.isLoadingMore -> {
+        // Listings area: loading / error / empty / cards
+        when {
+            uiState.isLoading && uiState.items.isEmpty() -> {
+                item {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(48.dp),
                         contentAlignment = Alignment.Center,
                     ) {
-                        CircularProgressIndicator(color = Orange500, modifier = Modifier.size(32.dp))
+                        CircularProgressIndicator(color = Orange500)
                     }
                 }
-                uiState.hasMore && uiState.items.isNotEmpty() -> {
+            }
+            uiState.error != null && uiState.items.isEmpty() -> {
+                item {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(48.dp),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Button(
-                            onClick = onLoadMore,
-                            colors = ButtonDefaults.buttonColors(containerColor = Orange500),
-                            shape = RoundedCornerShape(12.dp),
-                        ) {
-                            Text("Load More")
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "Something went wrong",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Button(onClick = onRetry) {
+                                Text("Retry")
+                            }
                         }
                     }
                 }
-                !uiState.hasMore && uiState.items.isNotEmpty() -> {
-                    Text(
-                        text = "No more listings",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    )
-                }
-                !uiState.isLoading && uiState.items.isEmpty() -> {
+            }
+            !uiState.isLoading && uiState.items.isEmpty() -> {
+                item {
                     val hasFilters = uiState.searchQuery.isNotBlank() ||
                         uiState.selectedArea != null ||
                         uiState.selectedTypes.isNotEmpty() ||
@@ -612,6 +587,69 @@ private fun SearchContent(
                     }
                 }
             }
+            else -> {
+                if (isTablet) {
+                    items(uiState.items.chunked(2), key = { "search_row_${it.first().uuid}" }) { row ->
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            row.forEach { listing ->
+                                ListingCard(
+                                    listing,
+                                    onClick = { onListingClick(listing.uuid) },
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                            if (row.size == 1) Spacer(Modifier.weight(1f))
+                        }
+                    }
+                } else {
+                    items(uiState.items, key = { "search_${it.uuid}" }) { listing ->
+                        ListingCard(listing, onClick = { onListingClick(listing.uuid) })
+                    }
+                }
+
+                // Load more / end states
+                item {
+                    when {
+                        uiState.isLoadingMore -> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                CircularProgressIndicator(color = Orange500, modifier = Modifier.size(32.dp))
+                            }
+                        }
+                        uiState.hasMore -> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Button(
+                                    onClick = onLoadMore,
+                                    colors = ButtonDefaults.buttonColors(containerColor = Orange500),
+                                    shape = RoundedCornerShape(12.dp),
+                                ) {
+                                    Text("Load More")
+                                }
+                            }
+                        }
+                        else -> {
+                            Text(
+                                text = "No more listings",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            )
+                        }
+                    }
+                }
+            }
         }
 
         // Bottom spacer
@@ -640,32 +678,3 @@ private fun SearchContent(
 }
 
 
-@Composable
-private fun LoadingContent() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        CircularProgressIndicator(color = Orange500)
-    }
-}
-
-@Composable
-private fun ErrorContent(onRetry: () -> Unit) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = "Something went wrong",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Spacer(Modifier.height(8.dp))
-            Button(onClick = onRetry) {
-                Text("Retry")
-            }
-        }
-    }
-}
