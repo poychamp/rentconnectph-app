@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">RentConnectApp</string>
+
+    <!-- App→web reverse Digital Asset Links statement. Includes the site's hosted
+         assetlinks.json so the app↔site relationship verifies both directions
+         (used by Chrome's related-app / intent:// "open in app" banner). -->
+    <string name="asset_statements" translatable="false">[{\"include\": \"https://rentconnectph.com/.well-known/assetlinks.json\"}]</string>
 </resources>
