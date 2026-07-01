@@ -1,10 +1,12 @@
 package ph.rentconnect.app
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -17,11 +19,14 @@ import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
+import kotlinx.coroutines.flow.MutableStateFlow
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import ph.rentconnect.app.core.network.MinVersionInterceptor
 import ph.rentconnect.app.core.persistence.ThemeMode
+import ph.rentconnect.app.core.util.DeepLinkTarget
 import ph.rentconnect.app.core.util.isAppOutdated
+import ph.rentconnect.app.core.util.parseDeepLink
 import ph.rentconnect.app.feature.forceupdate.ui.ForceUpdateScreen
 import ph.rentconnect.app.core.persistence.ThemePreferences
 import ph.rentconnect.app.feature.detail.data.InquiryApi
@@ -94,9 +99,22 @@ class MainActivity : ComponentActivity() {
     private val minVersionInterceptor = MinVersionInterceptor()
     private val retrofit by lazy { provideRetrofit() }
 
+    // Pending App Link URL, consumed once by the NavHost. Null on a plain launcher start.
+    private val deepLinkUrl = MutableStateFlow<String?>(null)
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        deepLinkUrl.value = intent.dataString
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        if (savedInstanceState == null) {
+            deepLinkUrl.value = intent?.dataString
+        }
 
         val homeViewModel = ViewModelProvider(
             this,
@@ -131,6 +149,43 @@ class MainActivity : ComponentActivity() {
                 }
 
                 val navController = rememberNavController()
+
+                val pendingDeepLink by deepLinkUrl.collectAsStateWithLifecycle()
+                LaunchedEffect(pendingDeepLink) {
+                    val url = pendingDeepLink ?: return@LaunchedEffect
+                    deepLinkUrl.value = null
+                    when (val target = parseDeepLink(url)) {
+                        null, DeepLinkTarget.Home ->
+                            navController.popBackStack(HomeRoute, inclusive = false)
+                        is DeepLinkTarget.Search ->
+                            navController.navigate(
+                                SearchRoute(
+                                    q = target.q,
+                                    area = target.area,
+                                    type = target.type,
+                                    budgetMin = target.budgetMin,
+                                    budgetMax = target.budgetMax,
+                                ),
+                            ) {
+                                popUpTo(HomeRoute) { saveState = true }
+                                launchSingleTop = true
+                            }
+                        DeepLinkTarget.About ->
+                            navController.navigate(AboutRoute) {
+                                popUpTo(HomeRoute) { saveState = true }
+                                launchSingleTop = true
+                            }
+                        DeepLinkTarget.Contact ->
+                            navController.navigate(ContactRoute) {
+                                popUpTo(HomeRoute) { saveState = true }
+                                launchSingleTop = true
+                            }
+                        is DeepLinkTarget.Detail ->
+                            navController.navigate(DetailRoute(target.uuid)) {
+                                launchSingleTop = true
+                            }
+                    }
+                }
 
                 NavHost(
                     navController = navController,
