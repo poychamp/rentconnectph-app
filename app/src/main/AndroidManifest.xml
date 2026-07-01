@@ -21,15 +21,37 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="${mapsApiKey}" />
 
+        <meta-data
+            android:name="asset_statements"
+            android:resource="@string/asset_statements" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:label="@string/app_name"
             android:theme="@style/Theme.RentConnectApp">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Verified App Links: only the paths the app owns are claimed.
+                 /privacy, /terms, /admin, /api are NOT listed, so they stay in the browser. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https" android:host="rentconnectph.com" />
+
+                <data android:path="/" />
+                <data android:path="/search" />
+                <data android:path="/about" />
+                <data android:path="/contact" />
+                <data android:pathPrefix="/listings/" />
             </intent-filter>
         </activity>
     </application>

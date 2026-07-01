@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">RentConnectApp</string>
+
+    <!-- App→web reverse Digital Asset Links statement (inline "web" target).
+         Required by the website's navigator.getInstalledRelatedApps() "open in app"
+         banner so it can detect this app is installed. MUST be the inline web form —
+         an include of assetlinks.json only yields android_app statements (App Links
+         direction) and produces no web statement, so the API would never match. -->
+    <string name="asset_statements" translatable="false">[{\"relation\": [\"delegate_permission/common.handle_all_urls\"], \"target\": {\"namespace\": \"web\", \"site\": \"https://rentconnectph.com\"}}]</string>
 </resources>
